@@ -411,11 +411,20 @@ function App() {
   const [openStop, setOpenStop] = useState(null);
 
   useEffect(() => {
-    const repoPath = RAW_BASE + "/data/tour.json";
-    fetch(repoPath + "?t=" + Date.now())
+    // Load from same domain first (works always on Netlify)
+    // Fall back to GitHub raw URL if not found locally
+    const localUrl = "/data/tour.json?t=" + Date.now();
+    fetch(localUrl)
       .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(data => { setTour(data); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
+      .catch(() => {
+        // Try GitHub raw URL as fallback
+        const ghUrl = RAW_BASE + "/data/tour.json?t=" + Date.now();
+        fetch(ghUrl)
+          .then(r => { if (!r.ok) throw new Error("No se encontró data/tour.json (HTTP " + r.status + "). Sube el fichero al repo de GitHub."); return r.json(); })
+          .then(data => { setTour(data); setLoading(false); })
+          .catch(e => { setError(e.message); setLoading(false); });
+      });
   }, []);
 
   useEffect(() => {

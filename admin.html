@@ -210,20 +210,17 @@ function doLogin() {
 // ── LOAD TOUR DATA ────────────────────────────────────────────────────────────
 function loadTour(cb) {
   // Try to load from GitHub raw URL first
-  var repoEl = document.querySelector('meta[name="github-repo"]');
-  var repo = (repoEl && repoEl.content) || 'cjlara/cordoba-tour';
-  var url = 'https://raw.githubusercontent.com/' + repo + '/main/data/tour.json?t=' + Date.now();
-  
-  fetch(url)
+  // Load from local Netlify path first (always works)
+  fetch('/data/tour.json?t=' + Date.now())
     .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
     .then(function(data) { tour = data; if (cb) cb(true); })
     .catch(function() {
-      // Fallback: create empty tour structure
+      // If not found locally, start with empty structure
       tour = {
         meta: { title: 'Mi Tour', subtitle: '', description: '', heroImage: '', version: '1.0', updatedAt: new Date().toISOString() },
         days: []
       };
-      if (cb) cb(true); // login still succeeds
+      if (cb) cb(true);
     });
 }
 

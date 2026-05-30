@@ -1,1 +1,74 @@
-
+{
+  "meta": {
+    "title": "Córdoba",
+    "subtitle": "La Ciudad Califal",
+    "description": "Donde tres civilizaciones se fundieron para crear uno de los centros culturales más brillantes de la historia.",
+    "heroImage": "",
+    "version": "1.0",
+    "updatedAt": "2025-01-01T00:00:00Z"
+  },
+  "days": [
+    {
+      "id": "day-1",
+      "title": "Día 1 · El Corazón Medieval",
+      "description": "El centro histórico declarado Patrimonio de la Humanidad",
+      "stops": [
+        {
+          "id": "stop-mezquita",
+          "order": 1,
+          "time": "09:00",
+          "duration": "90 min",
+          "type": "monument",
+          "color": "#C9A84C",
+          "name": "Mezquita-Catedral",
+          "location": "Córdoba, España",
+          "lat": 37.8789,
+          "lng": -4.7794,
+          "subtitle": "El bosque de columnas donde el Islam y el Cristianismo coexisten",
+          "description": "La Mezquita-Catedral de Córdoba es una de las obras maestras de la arquitectura mundial. Sobre una antigua basílica visigoda, el califa Abd al-Rahman I ordenó en el año 784 la construcción de la gran mezquita. Sus sucesores la fueron ampliando hasta crear un espacio con 856 columnas de mármol, jaspe y granito, coronadas por los icónicos arcos de herradura bicolores en rojo ladrillo y blanco piedra.",
+          "history": "En 1236, Fernando III reconquistó Córdoba y consagró la mezquita como catedral. Los reyes castellanos construyeron el coro y la capilla mayor en su interior en el siglo XVI. El propio Carlos I lo lamentó: «Habéis destruido algo único para construir algo que se puede ver en cualquier parte».",
+          "audioGuide": "Bienvenidos a la Mezquita-Catedral de Córdoba, uno de los monumentos más extraordinarios del mundo. Imagina el año 786 después de Cristo. Abd al-Rahman el Primero, el único superviviente de la masacre de los omeyas en Damasco, construye aquí la gran mezquita de Occidente. El resultado: este bosque infinito de columnas con arcos bicolores que ves ante ti.",
+          "facts": [
+            { "value": "784", "label": "Año fundación" },
+            { "value": "856", "label": "Columnas" },
+            { "value": "23.400m²", "label": "Superficie" }
+          ],
+          "tips": [
+            "Compra la entrada online — las colas pueden ser de más de una hora",
+            "Las entradas de 8:30 a 9:30h son gratuitas para el culto",
+            "No te pierdas el Mihrab: decorado en oro y mosaico bizantino"
+          ],
+          "photos": [],
+          "dishes": null
+        },
+        {
+          "id": "stop-juderia",
+          "order": 2,
+          "time": "10:45",
+          "duration": "45 min",
+          "type": "neighborhood",
+          "color": "#7A9E9F",
+          "name": "La Judería",
+          "location": "Córdoba, España",
+          "lat": 37.8797,
+          "lng": -4.7789,
+          "subtitle": "Laberinto de cal y flores donde el tiempo se detuvo",
+          "description": "El barrio judío de Córdoba es uno de los mejor conservados de Europa. Sus callejuelas estrechas, encaladas en blanco y adornadas con cientos de macetas de geranios, forman un laberinto íntimo apenas cambiado desde la Edad Media.",
+          "history": "La comunidad judía alcanzó su esplendor bajo el califato islámico. En el siglo X, Hasdai ibn Shaprut, médico judío al servicio del califa, era el hombre más influyente de la corte. Esa convivencia única terminó en 1492 con la expulsión de los judíos.",
+          "audioGuide": "Estás paseando por la Calleja de las Flores. Mira al fondo: la torre de la Mezquita enmarcada entre muros blancos y macetas de colores. Aquí nació en 1135 Maimónides, uno de los intelectos más extraordinarios de la historia. Médico, filósofo, astrónomo.",
+          "facts": [
+            { "value": "1315", "label": "Año sinagoga" },
+            { "value": "1492", "label": "Expulsión" },
+            { "value": "XII s.", "label": "Maimónides" }
+          ],
+          "tips": [
+            "La Sinagoga en Calle Judíos 20 — entrada 0.30€, gratuita domingos",
+            "La Calleja de las Flores: mejor antes de las 10h o al atardecer"
+          ],
+          "photos": [],
+          "dishes": null
+        }
+      ]
+    }
+  ]
+}

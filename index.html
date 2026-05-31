@@ -478,15 +478,11 @@ function App(){
   const [openStop,setOpenStop]=useState(null);
 
   useEffect(()=>{
-    fetch("/data/tour.json?t="+Date.now())
+    // Load via function to get always-fresh data (bypasses Netlify static cache)
+    fetch("/.netlify/functions/data?t="+Date.now())
       .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
       .then(d=>{setTour(d);setLoading(false);})
-      .catch(()=>{
-        fetch("https://raw.githubusercontent.com/cjlara/protour-app/main/data/tour.json?t="+Date.now())
-          .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
-          .then(d=>{setTour(d);setLoading(false);})
-          .catch(e=>{setError(e.message);setLoading(false);});
-      });
+      .catch(e=>{setError(e.message);setLoading(false);});
     if(window.speechSynthesis)window.speechSynthesis.getVoices();
   },[]);
 

@@ -109,6 +109,19 @@ select.inp option{background:#131920;}
 <input type="file" id="fup" accept="image/jpeg,image/png,image/webp" style="display:none">
 
 <script>
+// Global error trap
+window.onerror = function(msg, src, line, col, err) {
+  var el = document.getElementById('dbg-log');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'dbg-log';
+    el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#000;color:#f00;font-size:11px;padding:8px;z-index:9999;max-height:40vh;overflow-y:auto;font-family:monospace;';
+    document.body.appendChild(el);
+  }
+  el.innerHTML += '<div>JS ERROR: ' + msg + ' (line ' + line + ')</div>';
+  return false;
+};
+
 var ADMIN_TOKEN='', tour=null, activeDayIdx=null, activeDay=null, editIdx=null, dirty=false, wikiPhotos=[], dragSrc=null;
 
 var TYPES=[
@@ -125,29 +138,51 @@ function tmeta(type){return TYPES.find(function(t){return t.id===type;})||TYPES[
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
+function dbg(msg){
+  var el=document.getElementById('dbg-log');
+  if(!el){el=document.createElement('div');el.id='dbg-log';
+    el.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-size:11px;padding:8px;z-index:9999;max-height:40vh;overflow-y:auto;font-family:monospace;';
+    document.body.appendChild(el);}
+  el.innerHTML+='<div>'+new Date().toISOString().slice(11,19)+' '+msg+'</div>';
+  el.scrollTop=el.scrollHeight;
+}
+
 function doLogin(){
   try{
+    dbg('doLogin start');
     ADMIN_TOKEN=document.getElementById('tok').value.trim();
-    if(!ADMIN_TOKEN)return;
+    if(!ADMIN_TOKEN){dbg('no token');return;}
+    dbg('token set, calling loadTour');
     var btn=document.querySelector('.login-box .btn-gold');
     if(btn){btn.disabled=true;btn.textContent='Cargando…';}
     loadTour(function(ok){
+      dbg('loadTour callback ok='+ok);
       try{
         if(btn){btn.disabled=false;btn.textContent='Entrar';}
         if(ok){
+          dbg('showing CMS');
           document.getElementById('login').style.display='none';
           document.getElementById('cms').style.display='flex';
-          renderSidebar(); showMeta();
+          dbg('calling renderSidebar');
+          renderSidebar();
+          dbg('calling showMeta');
+          showMeta();
+          dbg('done');
         } else {
+          dbg('ok=false, showing error');
           document.getElementById('lerr').style.display='block';
           ADMIN_TOKEN='';
         }
       }catch(e){
+        dbg('ERROR in callback: '+e.message+' line:'+e.lineNumber);
         if(btn){btn.disabled=false;btn.textContent='Entrar';}
-        alert('Error al iniciar: '+e.message);
+        alert('Error callback: '+e.message);
       }
     });
-  }catch(e){alert('Error: '+e.message);}
+  }catch(e){
+    dbg('ERROR in doLogin: '+e.message);
+    alert('Error: '+e.message);
+  }
 }
 
 function loadTour(cb){

@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-05-31T11:48:41.871Z"
+    "updatedAt": "2025-01-01T00:00:00Z"
   },
   "days": [
     {
@@ -49,20 +49,11 @@
               "mapImage": ""
             }
           ],
-          "videoUrl": "https://youtu.be/FQvrONIgQjY?is=E93kzqY5rSE-l727",
+          "videoUrl": "https://www.youtube.com/watch?v=example1",
           "facts": [
-            {
-              "value": "784",
-              "label": "Año fundación"
-            },
-            {
-              "value": "856",
-              "label": "Columnas"
-            },
-            {
-              "value": "23.400m²",
-              "label": "Superficie"
-            }
+            { "value": "784", "label": "Año fundación" },
+            { "value": "856", "label": "Columnas" },
+            { "value": "23.400m²", "label": "Superficie" }
           ],
           "tips": [
             "Compra la entrada online — las colas pueden ser de más de una hora",
@@ -100,18 +91,9 @@
           ],
           "videoUrl": "",
           "facts": [
-            {
-              "value": "4.6★",
-              "label": "Valoración"
-            },
-            {
-              "value": "13-16h",
-              "label": "Horario"
-            },
-            {
-              "value": "€€",
-              "label": "Precio medio"
-            }
+            { "value": "4.6★", "label": "Valoración" },
+            { "value": "13-16h", "label": "Horario" },
+            { "value": "€€", "label": "Precio medio" }
           ],
           "tips": [
             "Reserva con antelación, especialmente fines de semana",
@@ -119,18 +101,9 @@
           ],
           "photos": [],
           "dishes": [
-            {
-              "name": "Salmorejo cordobés",
-              "description": "Con jamón ibérico y huevo duro"
-            },
-            {
-              "name": "Flamenquín",
-              "description": "Rulo de jamón y lomo empanado"
-            },
-            {
-              "name": "Rabo de toro",
-              "description": "Guiso tradicional estofado"
-            }
+            { "name": "Salmorejo cordobés", "description": "Con jamón ibérico y huevo duro" },
+            { "name": "Flamenquín", "description": "Rulo de jamón y lomo empanado" },
+            { "name": "Rabo de toro", "description": "Guiso tradicional estofado" }
           ],
           "website": "https://tabernalaviuda.es",
           "bookingUrl": "https://www.thefork.es/restaurante/taberna-la-viuda",

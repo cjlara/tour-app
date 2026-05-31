@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-05-31T20:32:53.958Z"
+    "updatedAt": "2026-05-31T20:35:00.524Z"
   },
   "days": [
     {
@@ -68,7 +68,9 @@
             "Compra la entrada online — las colas pueden ser de más de una hora",
             "Las entradas de 8:30 a 9:30h son gratuitas para el culto"
           ],
-          "photos": [],
+          "photos": [
+            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259692516.jpg"
+          ],
           "dishes": null,
           "website": "https://mezquita-catedraldecordoba.es",
           "bookingUrl": "",

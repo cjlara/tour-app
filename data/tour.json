@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-05-31T20:01:23.176Z"
+    "updatedAt": "2025-01-01T00:00:00Z"
   },
   "days": [
     {
@@ -49,28 +49,17 @@
               "mapImage": ""
             }
           ],
-          "videoUrl": "https://youtu.be/FQvrONIgQjY?is=7IFwT_I6wrt4Vr0E",
+          "videoUrl": "https://www.youtube.com/watch?v=example1",
           "facts": [
-            {
-              "value": "784",
-              "label": "Año fundación"
-            },
-            {
-              "value": "856",
-              "label": "Columnas"
-            },
-            {
-              "value": "23.400m²",
-              "label": "Superficie"
-            }
+            { "value": "784", "label": "Año fundación" },
+            { "value": "856", "label": "Columnas" },
+            { "value": "23.400m²", "label": "Superficie" }
           ],
           "tips": [
             "Compra la entrada online — las colas pueden ser de más de una hora",
             "Las entradas de 8:30 a 9:30h son gratuitas para el culto"
           ],
-          "photos": [
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780257653299.jpg"
-          ],
+          "photos": [],
           "dishes": null,
           "website": "https://mezquita-catedraldecordoba.es",
           "bookingUrl": "",
@@ -102,18 +91,9 @@
           ],
           "videoUrl": "",
           "facts": [
-            {
-              "value": "4.6★",
-              "label": "Valoración"
-            },
-            {
-              "value": "13-16h",
-              "label": "Horario"
-            },
-            {
-              "value": "€€",
-              "label": "Precio medio"
-            }
+            { "value": "4.6★", "label": "Valoración" },
+            { "value": "13-16h", "label": "Horario" },
+            { "value": "€€", "label": "Precio medio" }
           ],
           "tips": [
             "Reserva con antelación, especialmente fines de semana",
@@ -121,18 +101,9 @@
           ],
           "photos": [],
           "dishes": [
-            {
-              "name": "Salmorejo cordobés",
-              "description": "Con jamón ibérico y huevo duro"
-            },
-            {
-              "name": "Flamenquín",
-              "description": "Rulo de jamón y lomo empanado"
-            },
-            {
-              "name": "Rabo de toro",
-              "description": "Guiso tradicional estofado"
-            }
+            { "name": "Salmorejo cordobés", "description": "Con jamón ibérico y huevo duro" },
+            { "name": "Flamenquín", "description": "Rulo de jamón y lomo empanado" },
+            { "name": "Rabo de toro", "description": "Guiso tradicional estofado" }
           ],
           "website": "https://tabernalaviuda.es",
           "bookingUrl": "https://www.thefork.es/restaurante/taberna-la-viuda",

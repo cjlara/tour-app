@@ -632,9 +632,23 @@ async function saveTour(){
     var r=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:JSON.stringify({tourData:tour})});
     var d=await r.json();
     if(d.error)throw new Error(d.error);
-    dirty=false;btn.textContent='✓ Guardado';btn.disabled=false;
-    setTimeout(function(){btn.textContent='💾 Guardar';btn.disabled=true;},2000);
-    toast('✓ Guardado en GitHub','ok');
+    dirty=false;
+    btn.textContent='✓ Guardado';btn.disabled=false;
+    // Verify the data endpoint serves the new version
+    setTimeout(function(){
+      fetch('/.netlify/functions/data?t='+Date.now())
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.error){
+            toast('Guardado en GitHub pero error al verificar: '+d.error,'err');
+          } else {
+            var stops=(d.days||[]).reduce(function(acc,day){return acc+(day.stops||[]).length;},0);
+            toast('✓ Guardado y verificado — '+stops+' paradas en '+( d.days||[]).length+' día(s)','ok');
+          }
+        })
+        .catch(function(e){toast('Guardado en GitHub (verificación falló: '+e.message+')','ok');});
+      btn.textContent='💾 Guardar';btn.disabled=true;
+    },1500);
   }catch(e){btn.textContent='💾 Guardar';btn.disabled=false;toast('Error: '+e.message,'err');}
 }
 

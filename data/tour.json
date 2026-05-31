@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-05-31T20:35:00.524Z"
+    "updatedAt": "2026-05-31T20:38:49.545Z"
   },
   "days": [
     {
@@ -69,7 +69,10 @@
             "Las entradas de 8:30 a 9:30h son gratuitas para el culto"
           ],
           "photos": [
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259692516.jpg"
+            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259692516.jpg",
+            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259906413.jpg",
+            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259916179.jpg",
+            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259925724.jpg"
           ],
           "dishes": null,
           "website": "https://mezquita-catedraldecordoba.es",

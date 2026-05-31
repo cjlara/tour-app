@@ -1,72 +1,87 @@
-// data.js — serves tour.json fresh from GitHub (no Netlify static cache)
+// data.js — serves tour.json
+// Reads from GitHub (always fresh) with fallback to static file
 const https = require("https");
-
-const REPO   = process.env.GITHUB_REPO   || "";
-const GTOKEN = process.env.GITHUB_TOKEN  || "";
-const BRANCH = process.env.GITHUB_BRANCH || "main";
+const fs    = require("fs");
+const path  = require("path");
 
 exports.handler = async function (event) {
-  const cors = {
+  const headers = {
     "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/json",
-    "Cache-Control": "no-store",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
   };
 
-  if (!REPO || !GTOKEN) {
-    // Fallback: serve the bundled tour.json
-    const fs = require("fs");
-    const path = require("path");
+  const REPO   = process.env.GITHUB_REPO   || "";
+  const GTOKEN = process.env.GITHUB_TOKEN  || "";
+  const BRANCH = process.env.GITHUB_BRANCH || "main";
+
+  // Log env for debugging (remove after confirming)
+  console.log("data.js GITHUB_REPO:", REPO || "(not set)");
+
+  // Try GitHub first if configured
+  if (REPO && GTOKEN) {
     try {
-      const local = fs.readFileSync(path.join(__dirname, "../../data/tour.json"), "utf8");
-      return { statusCode: 200, headers: cors, body: local };
-    } catch(e) {
-      return { statusCode: 404, headers: cors, body: JSON.stringify({error: "tour.json not found"}) };
+      const result = await ghGet(
+        "https://api.github.com/repos/" + REPO + "/contents/data/tour.json?ref=" + BRANCH,
+        GTOKEN
+      );
+      const decoded = Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
+      // Validate it's JSON
+      JSON.parse(decoded);
+      console.log("data.js: served from GitHub repo", REPO);
+      return { statusCode: 200, headers, body: decoded };
+    } catch (err) {
+      console.error("data.js GitHub error:", err.message);
+      // Fall through to static file
     }
   }
 
+  // Fallback: static file bundled at deploy time
   try {
-    const result = await ghGet("/repos/" + REPO + "/contents/data/tour.json?ref=" + BRANCH);
-    // GitHub returns file content as base64
-    const content = Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
-    return { statusCode: 200, headers: cors, body: content };
-  } catch (err) {
-    // Fallback to static file
-    try {
-      const fs = require("fs"), path = require("path");
-      const local = fs.readFileSync(path.join(__dirname, "../../data/tour.json"), "utf8");
-      return { statusCode: 200, headers: cors, body: local };
-    } catch(e2) {
-      return { statusCode: 500, headers: cors, body: JSON.stringify({error: err.message}) };
-    }
+    const staticPath = path.join(__dirname, "..", "..", "data", "tour.json");
+    const local = fs.readFileSync(staticPath, "utf8");
+    console.log("data.js: served from static file");
+    return { statusCode: 200, headers, body: local };
+  } catch (e) {
+    console.error("data.js static fallback failed:", e.message);
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        error: "tour.json not found. GITHUB_REPO=" + (REPO||"not set"),
+        meta: { title: "Tour", subtitle: "", description: "", heroImage: "", videoUrl: "", version: "3.1" },
+        days: []
+      })
+    };
   }
 };
 
-function ghGet(path) {
+function ghGet(url, token) {
   return new Promise((resolve, reject) => {
-    const opts = {
-      hostname: "api.github.com",
-      path,
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname,
+      path: u.pathname + u.search,
       method: "GET",
       headers: {
-        "User-Agent": "tour-app",
-        "Authorization": "Bearer " + GTOKEN,
+        "User-Agent": "tour-app/1.0",
+        "Authorization": "Bearer " + token,
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-    };
-    const req = https.request(opts, (res) => {
+    }, (res) => {
       let d = "";
       res.on("data", c => d += c);
       res.on("end", () => {
         try {
           const parsed = JSON.parse(d);
           if (res.statusCode >= 400) {
-            const err = new Error(parsed.message || "GitHub " + res.statusCode);
-            err.status = res.statusCode;
-            return reject(err);
+            return reject(new Error("GitHub " + res.statusCode + ": " + (parsed.message || d.slice(0,100))));
           }
           resolve(parsed);
-        } catch(e) { reject(e); }
+        } catch(e) {
+          reject(new Error("JSON parse error: " + d.slice(0, 100)));
+        }
       });
     });
     req.on("error", reject);

@@ -16,512 +16,538 @@
 :root{
   --gold:#C9A84C;--gold2:#E8C97A;--ivory:#F5EFE0;--parch:#EDE3C8;
   --terra:#B5541B;--ink:#0D1117;--card:#131920;--smoke:#1E2535;
-  --border:rgba(201,168,76,0.18);
+  --border:rgba(201,168,76,0.18);--rest:#E84040;
   --serif:'Cormorant Garamond',Georgia,serif;
   --display:'Playfair Display',Georgia,serif;
 }
 html{scroll-behavior:smooth;}
 body{background:var(--ink);color:var(--ivory);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-button{font-family:var(--serif);cursor:pointer;}
-/* Leaflet dark */
+button,a{font-family:var(--serif);cursor:pointer;}
+img{max-width:100%;}
+/* Leaflet */
 .leaflet-container{background:#0e1420;}
-.leaflet-popup-content-wrapper{background:rgba(14,20,32,0.97);border:1px solid var(--border);border-radius:0;color:var(--ivory);}
+.leaflet-popup-content-wrapper{background:rgba(14,20,32,0.97);border:1px solid var(--border);border-radius:0;color:var(--ivory);box-shadow:0 8px 30px rgba(0,0,0,0.6);}
 .leaflet-popup-tip{background:rgba(14,20,32,0.97);}
-.leaflet-popup-content{margin:10px 14px;font-family:var(--serif);}
-/* Waveform */
-.wbar{display:inline-block;width:2px;height:3px;background:currentColor;border-radius:1px;margin:0 1px;transition:height .1s;}
+.leaflet-popup-content{margin:12px 14px;font-family:var(--serif);}
+/* Wave */
+.wbar{display:inline-block;width:2px;height:3px;background:currentColor;border-radius:1px;margin:0 1px;}
 .wbar.on{animation:wv .7s ease-in-out infinite;}
 .wbar.on:nth-child(2){animation-delay:.1s}.wbar.on:nth-child(3){animation-delay:.2s}
 .wbar.on:nth-child(4){animation-delay:.15s}.wbar.on:nth-child(5){animation-delay:.05s}
 .wbar.on:nth-child(6){animation-delay:.22s}.wbar.on:nth-child(7){animation-delay:.1s}
 .wbar.on:nth-child(8){animation-delay:.18s}
 @keyframes wv{0%,100%{height:3px}50%{height:14px}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div id="root"></div>
-
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const {useState,useEffect,useRef,useCallback,useMemo} = React;
 
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
-const GITHUB_REPO = (window.GITHUB_REPO) || "";
-const RAW_BASE = "https://raw.githubusercontent.com/" + (GITHUB_REPO || "cjlara/cordoba-tour") + "/main";
-
-const C = {
-  gold:"#C9A84C", gold2:"#E8C97A", ivory:"#F5EFE0", parch:"#EDE3C8",
-  terra:"#B5541B", ink:"#0D1117", card:"#131920", border:"rgba(201,168,76,0.18)",
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const C = {gold:"#C9A84C",gold2:"#E8C97A",ivory:"#F5EFE0",parch:"#EDE3C8",terra:"#B5541B",ink:"#0D1117",card:"#131920",border:"rgba(201,168,76,0.18)"};
+const TYPE_META = {
+  monument: {color:"#C9A84C", icon:"🏛", label:"Monumento"},
+  restaurant:{color:"#E84040", icon:"🍽", label:"Restaurante"},
+  neighborhood:{color:"#7A9E9F",icon:"🏘",label:"Barrio"},
+  museum:    {color:"#6B7FA3", icon:"🎨",label:"Museo"},
+  viewpoint: {color:"#5A8A5E", icon:"🌿",label:"Mirador"},
+  market:    {color:"#8B5E3C", icon:"🛍",label:"Mercado"},
+  other:     {color:"#9A8A7A", icon:"📍",label:"Atracción"},
 };
-
-const TYPE_COLORS = {
-  monument:"#C9A84C", restaurant:"#B5541B", neighborhood:"#7A9E9F",
-  museum:"#6B7FA3", viewpoint:"#5A8A5E", market:"#8B5E3C", other:"#9A8A7A"
-};
+function tmeta(type){return TYPE_META[type]||TYPE_META.other;}
 
 // ── AUDIO ENGINE ──────────────────────────────────────────────────────────────
 const synth = window.speechSynthesis;
-let globalUtter = null, globalBtn = null;
-
-function getBestVoice() {
-  const voices = synth.getVoices();
-  return voices.find(v => v.lang === 'es-ES' && /google/i.test(v.name))
-    || voices.find(v => v.lang.startsWith('es-ES'))
-    || voices.find(v => v.lang.startsWith('es'))
-    || null;
-}
-
-function stopAll() {
-  synth.cancel();
-  if (globalBtn) { globalBtn.setPlaying(false); globalBtn = null; }
-}
-
-function readText(text, btnController) {
+let gUtter=null, gCtrl=null;
+function bestVoice(){const v=synth.getVoices();return v.find(x=>x.lang==='es-ES'&&/google/i.test(x.name))||v.find(x=>x.lang.startsWith('es-ES'))||v.find(x=>x.lang.startsWith('es'))||null;}
+function stopAll(){synth.cancel();if(gCtrl){gCtrl.setPlaying(false);gCtrl=null;}}
+function startRead(text,ctrl){
   stopAll();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'es-ES'; utter.rate = 0.88; utter.pitch = 1.0;
-  const v = getBestVoice(); if (v) utter.voice = v;
-  utter.onstart  = () => { btnController.setPlaying(true); globalBtn = btnController; };
-  utter.onend    = utter.onerror = () => { btnController.setPlaying(false); if (globalBtn === btnController) globalBtn = null; };
-  utter.onpause  = () => btnController.setPlaying(false);
-  utter.onresume = () => btnController.setPlaying(true);
-  globalUtter = utter;
-  synth.speak(utter);
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='es-ES';u.rate=0.88;u.pitch=1.0;
+  const v=bestVoice();if(v)u.voice=v;
+  u.onstart=()=>{ctrl.setPlaying(true);gCtrl=ctrl;};
+  u.onend=u.onerror=()=>{ctrl.setPlaying(false);if(gCtrl===ctrl)gCtrl=null;};
+  u.onpause=()=>ctrl.setPlaying(false);
+  u.onresume=()=>ctrl.setPlaying(true);
+  gUtter=u; synth.speak(u);
+}
+function toggleRead(text,ctrl){
+  if(gCtrl===ctrl&&synth.speaking){synth.paused?synth.resume():synth.pause();return;}
+  startRead(text,ctrl);
 }
 
-function toggleRead(text, btnController) {
-  if (globalBtn === btnController && synth.speaking) {
-    if (synth.paused) { synth.resume(); btnController.setPlaying(true); }
-    else { synth.pause(); btnController.setPlaying(false); }
-    return;
-  }
-  readText(text, btnController);
+// ── READ BUTTON ───────────────────────────────────────────────────────────────
+function ReadBtn({text,label="🔊 Leer",small,style={}}){
+  const [p,setP]=useState(false);
+  const c=useMemo(()=>({setPlaying:setP}),[]);
+  const s={display:"inline-flex",alignItems:"center",gap:"0.35rem",
+    background:p?C.gold:"transparent",border:`1px solid ${p?C.gold:"rgba(201,168,76,0.3)"}`,
+    color:p?C.ink:C.gold,fontFamily:"var(--serif)",fontSize:small?"0.68rem":"0.75rem",
+    letterSpacing:"0.15em",textTransform:"uppercase",padding:small?"0.2rem 0.55rem":"0.3rem 0.75rem",
+    cursor:"pointer",transition:"all 0.2s",borderRadius:2,...style};
+  const bars=[4,8,14,6,12,10,5,9];
+  return <button style={s} onClick={()=>toggleRead(text,c)}>
+    {p?<span style={{display:"flex",alignItems:"center",gap:1}}>{bars.map((h,i)=><span key={i} className="wbar on" style={{height:h+"px"}}/>)}</span>:<span>🔊</span>}
+    {p?"Leyendo…":label}
+  </button>;
 }
 
-// ── READ BUTTON COMPONENT ─────────────────────────────────────────────────────
-function ReadBtn({ text, label = "🔊 Leer", small }) {
-  const [playing, setPlaying] = useState(false);
-  const ctrl = useMemo(() => ({ setPlaying }), []);
-  const s = {
-    display:"inline-flex", alignItems:"center", gap:"0.35rem",
-    background: playing ? C.gold : "transparent",
-    border:`1px solid ${playing ? C.gold : "rgba(201,168,76,0.3)"}`,
-    color: playing ? C.ink : C.gold,
-    fontFamily:"var(--serif)", fontSize: small ? "0.68rem" : "0.75rem",
-    letterSpacing:"0.15em", textTransform:"uppercase",
-    padding: small ? "0.2rem 0.55rem" : "0.3rem 0.75rem",
-    cursor:"pointer", transition:"all 0.2s", borderRadius:2,
-    marginTop:"0.5rem",
-  };
-  const waves = [4,8,14,6,12,10,5,9];
-  return (
-    <button style={s} onClick={() => toggleRead(text, ctrl)}>
-      {playing ? (
-        <span style={{display:"flex",alignItems:"center",gap:1}}>
-          {waves.map((h,i) => <span key={i} className="wbar on" style={{height:h+"px"}}/>)}
-        </span>
-      ) : <span>🔊</span>}
-      {playing ? "Leyendo…" : label}
+// ── YOUTUBE EMBED ─────────────────────────────────────────────────────────────
+function getYTId(url){
+  if(!url)return null;
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]+)/);
+  return m?m[1]:null;
+}
+function YouTubeEmbed({url,title=""}){
+  const id=getYTId(url);
+  if(!id)return null;
+  return <div style={{position:"relative",paddingTop:"56.25%",margin:"1rem 0",background:"#000"}}>
+    <iframe style={{position:"absolute",inset:0,width:"100%",height:"100%",border:"none"}}
+      src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
+      title={title} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen/>
+  </div>;
+}
+
+// ── DIRECTIONS BUTTON ─────────────────────────────────────────────────────────
+function DirectionsBtn({lat,lng,name,small}){
+  if(!lat||!lng)return null;
+  const enc=encodeURIComponent(name||"");
+  const dest=`${lat},${lng}`;
+  const modes=[
+    {label:"🚶 Pie",    tmode:"walking"},
+    {label:"🚗 Coche",  tmode:"driving"},
+    {label:"🚌 Bus",    tmode:"transit"},
+  ];
+  const [open,setOpen]=useState(false);
+  return <div style={{position:"relative",display:"inline-block"}}>
+    <button onClick={()=>setOpen(o=>!o)} style={{display:"inline-flex",alignItems:"center",gap:"0.35rem",background:"transparent",border:`1px solid rgba(201,168,76,0.35)`,color:C.gold,fontFamily:"var(--serif)",fontSize:small?"0.72rem":"0.8rem",letterSpacing:"0.12em",textTransform:"uppercase",padding:"0.35rem 0.8rem",cursor:"pointer"}}>
+      📍 Cómo llegar
     </button>
-  );
+    {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:4,background:"rgba(14,20,32,0.98)",border:`1px solid ${C.border}`,zIndex:50,minWidth:160,boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+      {modes.map(m=><a key={m.tmode}
+        href={`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=${m.tmode}`}
+        target="_blank" rel="noopener noreferrer"
+        style={{display:"block",padding:"0.55rem 0.9rem",color:C.parch,fontSize:"0.82rem",borderBottom:`1px solid ${C.border}`,textDecoration:"none"}}
+        onMouseOver={e=>e.currentTarget.style.color=C.gold}
+        onMouseOut={e=>e.currentTarget.style.color=C.parch}
+        onClick={()=>setOpen(false)}>
+        {m.label}
+      </a>)}
+    </div>}
+  </div>;
 }
 
-// ── MAP COMPONENT ─────────────────────────────────────────────────────────────
-function TourMap({ stops, activeDay, onSelectStop }) {
-  const mapRef = useRef(null);
-  const instanceRef = useRef(null);
+// ── MAP ───────────────────────────────────────────────────────────────────────
+function TourMap({allStops,activeDay,onSelectStop}){
+  const ref=useRef(null);
+  const inst=useRef(null);
 
-  useEffect(() => {
-    if (!mapRef.current || instanceRef.current) return;
-    const allStops = stops.filter(s => s.lat && s.lng);
-    if (!allStops.length) return;
+  useEffect(()=>{
+    if(!ref.current||inst.current)return;
+    const geo=allStops.filter(s=>s.lat&&s.lng);
+    if(!geo.length)return;
+    const clat=geo.reduce((s,p)=>s+p.lat,0)/geo.length;
+    const clng=geo.reduce((s,p)=>s+p.lng,0)/geo.length;
+    const map=L.map(ref.current,{center:[clat,clng],zoom:14,scrollWheelZoom:false});
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{attribution:"© OSM © CARTO",subdomains:"abcd",maxZoom:19}).addTo(map);
 
-    const center = [
-      allStops.reduce((s,p) => s + p.lat, 0) / allStops.length,
-      allStops.reduce((s,p) => s + p.lng, 0) / allStops.length,
-    ];
+    // Route polyline
+    if(activeDay&&activeDay.stops){
+      const pts=activeDay.stops.filter(s=>s.lat&&s.lng).map(s=>[s.lat,s.lng]);
+      if(pts.length>1)L.polyline(pts,{color:C.gold,weight:2,opacity:0.5,dashArray:"6,8"}).addTo(map);
+    }
 
-    const map = L.map(mapRef.current, { center, zoom: 14, scrollWheelZoom: false });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution:"© OpenStreetMap © CARTO", subdomains:"abcd", maxZoom:19
-    }).addTo(map);
+    allStops.forEach((stop,i)=>{
+      const tm=tmeta(stop.type);
+      const isRest=stop.type==="restaurant";
+      const markerHtml=isRest
+        ?`<div style="width:32px;height:32px;border-radius:4px;background:${tm.color};border:2px solid rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 10px rgba(0,0,0,0.6);cursor:pointer;">${tm.icon}</div>`
+        :`<div style="width:30px;height:30px;border-radius:50%;background:${tm.color};border:2px solid rgba(255,255,255,0.75);display:flex;align-items:center;justify-content:center;color:#0D1117;font-weight:700;font-size:0.72rem;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;">${i+1}</div>`;
 
-    // Draw route line per day
-    activeDay && activeDay.stops && L.polyline(
-      activeDay.stops.filter(s => s.lat && s.lng).map(s => [s.lat, s.lng]),
-      { color: C.gold, weight: 2, opacity: 0.5, dashArray: "6,8" }
-    ).addTo(map);
+      const icon=L.divIcon({className:"",html:markerHtml,iconSize:isRest?[32,32]:[30,30],iconAnchor:isRest?[16,16]:[15,15],popupAnchor:[0,-18]});
+      const marker=L.marker([stop.lat,stop.lng],{icon}).addTo(map);
 
-    allStops.forEach((stop, i) => {
-      const color = stop.color || TYPE_COLORS[stop.type] || C.gold;
-      const icon = L.divIcon({
-        className: "",
-        html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;color:#0D1117;font-weight:700;font-size:0.72rem;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;">${i + 1}</div>`,
-        iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16],
-      });
-      const marker = L.marker([stop.lat, stop.lng], { icon }).addTo(map);
-      marker.bindPopup(
-        `<div style="font-family:var(--serif);">
-          <div style="font-size:0.65rem;color:${color};text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.2rem;">${stop.time || ""}</div>
-          <div style="font-size:0.95rem;font-weight:600;margin-bottom:0.4rem;">${stop.name}</div>
-          <button onclick="document.dispatchEvent(new CustomEvent('selectStop',{detail:'${stop.id}'}));" style="background:${color};border:none;color:#0D1117;font-size:0.75rem;padding:0.3rem 0.7rem;cursor:pointer;font-family:var(--serif);">Ver parada →</button>
-        </div>`,
-        { maxWidth: 200 }
-      );
+      const dest=`${stop.lat},${stop.lng}`;
+      const mapsBase=`https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+      const popupContent=`
+        <div style="font-family:var(--serif);min-width:180px;">
+          <div style="font-size:0.65rem;color:${tm.color};text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.25rem;">${tm.icon} ${tm.label}${stop.time?" · "+stop.time:""}</div>
+          <div style="font-family:var(--display);font-size:1rem;color:#F5EFE0;margin-bottom:0.15rem;">${stop.name}</div>
+          ${stop.address?`<div style="font-size:0.75rem;color:#EDE3C8;opacity:0.6;margin-bottom:0.6rem;">${stop.address}</div>`:""}
+          <div style="display:flex;flex-direction:column;gap:0.35rem;margin-bottom:0.6rem;">
+            <a href="${mapsBase}&travelmode=walking" target="_blank" style="display:flex;align-items:center;gap:0.4rem;color:#EDE3C8;font-size:0.8rem;text-decoration:none;padding:0.3rem 0;border-bottom:1px solid rgba(201,168,76,0.15);" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='#EDE3C8'">🚶 A pie</a>
+            <a href="${mapsBase}&travelmode=driving" target="_blank" style="display:flex;align-items:center;gap:0.4rem;color:#EDE3C8;font-size:0.8rem;text-decoration:none;padding:0.3rem 0;border-bottom:1px solid rgba(201,168,76,0.15);" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='#EDE3C8'">🚗 En coche</a>
+            <a href="${mapsBase}&travelmode=transit" target="_blank" style="display:flex;align-items:center;gap:0.4rem;color:#EDE3C8;font-size:0.8rem;text-decoration:none;padding:0.3rem 0;" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='#EDE3C8'">🚌 Transporte público</a>
+          </div>
+          <button onclick="document.dispatchEvent(new CustomEvent('openStop',{detail:'${stop.id}'}))" style="background:${tm.color};border:none;color:#0D1117;font-size:0.75rem;padding:0.35rem 0.8rem;cursor:pointer;font-family:var(--serif);letter-spacing:0.1em;width:100%;">Ver detalle →</button>
+          ${stop.bookingUrl?`<a href="${stop.bookingUrl}" target="_blank" style="display:block;margin-top:0.35rem;background:transparent;border:1px solid ${tm.color};color:${tm.color};font-size:0.75rem;padding:0.3rem 0.8rem;text-align:center;text-decoration:none;letter-spacing:0.1em;">🗓 Reservar</a>`:""}
+        </div>`;
+      marker.bindPopup(popupContent,{maxWidth:240});
     });
 
-    instanceRef.current = map;
-  }, [stops, activeDay]);
+    // Map legend
+    inst.current=map;
+  },[]);
 
-  useEffect(() => {
-    const handler = (e) => onSelectStop && onSelectStop(e.detail);
-    document.addEventListener("selectStop", handler);
-    return () => document.removeEventListener("selectStop", handler);
-  }, [onSelectStop]);
+  useEffect(()=>{
+    const h=e=>onSelectStop&&onSelectStop(e.detail);
+    document.addEventListener("openStop",h);
+    return()=>document.removeEventListener("openStop",h);
+  },[onSelectStop]);
 
-  return <div ref={mapRef} style={{ width:"100%", maxWidth:900, height:380, margin:"0 auto", border:`1px solid ${C.border}` }} />;
+  // Legend
+  const presentTypes=[...new Set(allStops.map(s=>s.type||"other"))];
+
+  return <div>
+    <div ref={ref} style={{width:"100%",maxWidth:960,height:400,margin:"0 auto",border:`1px solid ${C.border}`}}/>
+    <div style={{display:"flex",flexWrap:"wrap",gap:"0.6rem",justifyContent:"center",marginTop:"1rem",maxWidth:960,margin:"0.8rem auto 0"}}>
+      {presentTypes.map(t=>{const m=tmeta(t);return(
+        <div key={t} style={{display:"flex",alignItems:"center",gap:"0.4rem",fontSize:"0.78rem",color:C.parch,opacity:0.75,padding:"0.25rem 0.7rem",border:`1px solid ${C.border}`}}>
+          <span>{m.icon}</span><span style={{color:m.color}}>{m.label}</span>
+        </div>
+      );})}
+    </div>
+  </div>;
 }
 
-// ── DETAIL PANEL ──────────────────────────────────────────────────────────────
-function DetailPanel({ stop, onClose }) {
-  const [detailContent, setDetailContent] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+// ── AUDIO SECTIONS ────────────────────────────────────────────────────────────
+function AudioSections({sections,stopName}){
+  const [active,setActive]=useState(null);
+  if(!sections||!sections.length)return null;
+  return <div style={{margin:"1.2rem 0"}}>
+    <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.8rem",fontFamily:"var(--display)"}}>🎧 Audioguía por secciones</div>
+    {sections.map((sec,i)=>{
+      const open=active===i;
+      const allText=sections.map(s=>s.title+". "+s.text).join(". ");
+      return <div key={sec.id||i} style={{marginBottom:"0.5rem",border:`1px solid ${open?C.gold:C.border}`,transition:"border .2s"}}>
+        <button onClick={()=>setActive(open?null:i)} style={{width:"100%",background:open?"rgba(201,168,76,0.06)":"transparent",border:"none",padding:"0.7rem 1rem",display:"flex",alignItems:"center",gap:"0.7rem",cursor:"pointer",textAlign:"left"}}>
+          <div style={{width:24,height:24,borderRadius:"50%",background:open?C.gold:"rgba(201,168,76,0.15)",color:open?C.ink:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem",fontWeight:700,flexShrink:0}}>{i+1}</div>
+          <div style={{flex:1,fontFamily:"var(--display)",fontSize:"0.92rem",color:open?C.ivory:C.parch}}>{sec.title}</div>
+          <span style={{color:C.gold,opacity:0.6,fontSize:"0.8rem"}}>{open?"▲":"▼"}</span>
+        </button>
+        {open&&<div style={{padding:"0 1rem 1rem",animation:"fadeIn 0.3s ease"}}>
+          {sec.mapImage&&<img src={sec.mapImage} alt="Plano interior" style={{width:"100%",maxHeight:200,objectFit:"contain",marginBottom:"0.8rem",border:`1px solid ${C.border}`,background:"#080d14"}}/>}
+          <p style={{fontSize:"0.95rem",lineHeight:1.85,color:C.parch,fontWeight:300}}>{sec.text}</p>
+          <ReadBtn text={sec.text} label="🔊 Escuchar esta sección" small style={{marginTop:"0.6rem"}}/>
+        </div>}
+      </div>;
+    })}
+    <div style={{marginTop:"0.6rem"}}>
+      <ReadBtn text={sections.map(s=>s.title+". "+s.text).join(". ")} label="🔊 Escuchar todo" small/>
+    </div>
+  </div>;
+}
 
-  async function loadDetail() {
-    if (detailContent || loading) return;
-    setLoading(true); setError("");
-    try {
-      const prompt = `Genera contenido HTML detallado en español para la atracción turística: "${stop.name}" en ${stop.location || "España"}.
-Usa exactamente estas clases CSS:
-1) <div class='detail-section'><div class='detail-section-title'>Historia profunda</div><div class='detail-text'><p>3-4 párrafos ricos</p></div></div>
-2) <div class='detail-section'><div class='detail-section-title'>Anécdotas y curiosidades</div><div class='anecdote-card'><div class='anecdote-title'>ANÉCDOTA</div><div class='anecdote-text'>texto</div></div><div class='anecdote-card'>...</div></div>
-3) <div class='detail-section'><div class='detail-section-title'>Datos y cifras</div><div class='infographic'><div class='info-box'><span class='info-box-icon'>emoji</span><span class='info-box-val'>valor</span><div class='info-box-lbl'>etiqueta</div></div>×4</div></div>
-4) <div class='detail-section'><div class='detail-section-title'>Línea del tiempo</div><div class='timeline'>5-7 eventos con año</div></div>
-5) <div class='detail-section'><div class='detail-section-title'>Secretos y curiosidades ocultas</div><div class='detail-text'><p>...</p></div></div>
-Solo el HTML, sin markdown.`;
+// ── STOP DETAIL PANEL ─────────────────────────────────────────────────────────
+function StopPanel({stop,onClose}){
+  const [aiContent,setAi]=useState(null);
+  const [aiLoading,setAiL]=useState(false);
+  const [aiErr,setAiE]=useState("");
+  const tm=tmeta(stop.type);
+  const isRest=stop.type==="restaurant";
 
-      const res = await fetch("/.netlify/functions/claude", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [{ role:"user", content:prompt }] }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-      const text = data.content?.filter(b => b.type==="text").map(b => b.text).join("") || "";
-      if (!text) throw new Error("Respuesta vacía");
-      setDetailContent(text.replace(/^```html\n?/i,"").replace(/```$/m,"").trim());
-    } catch(e) { setError(e.message); }
-    finally { setLoading(false); }
+  async function loadAI(){
+    if(aiContent||aiLoading)return;
+    setAiL(true);setAiE("");
+    try{
+      const prompt=`Genera contenido HTML detallado en español para: "${stop.name}" (${tm.label}) en ${stop.location||"España"}. Contexto: ${stop.description||""}. Usa estas clases CSS exactas (sin markdown):
+<div class='detail-section'><div class='detail-section-title'>Historia profunda</div><div class='detail-text'><p>...</p><p>...</p><p>...</p></div></div>
+<div class='detail-section'><div class='detail-section-title'>Anécdotas</div><div class='anecdote-card'><div class='anecdote-title'>ANÉCDOTA</div><div class='anecdote-text'>...</div></div></div>
+<div class='detail-section'><div class='detail-section-title'>Datos y cifras</div><div class='infographic'><div class='info-box'><span class='info-box-icon'>emoji</span><span class='info-box-val'>valor</span><div class='info-box-lbl'>etiqueta</div></div>×4</div></div>
+<div class='detail-section'><div class='detail-section-title'>Línea del tiempo</div><div class='timeline'><div class='tl-item'><div class='tl-left'><div class='tl-year'>AÑO</div><div class='tl-dot'></div><div class='tl-line'></div></div><div class='tl-content'><div class='tl-event'>evento</div><div class='tl-detail'>detalle</div></div></div>×5</div></div>
+<div class='detail-section'><div class='detail-section-title'>Curiosidades ocultas</div><div class='detail-text'><p>...</p></div></div>`;
+      const res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:prompt}]})});
+      const d=await res.json();
+      if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+      const t=d.content?.filter(b=>b.type==="text").map(b=>b.text).join("")||"";
+      if(!t)throw new Error("Respuesta vacía");
+      setAi(t.replace(/^```html\n?/i,"").replace(/```$/m,"").trim());
+    }catch(e){setAiE(e.message);}
+    finally{setAiL(false);}
   }
 
-  const allText = [stop.description, stop.history, stop.audioGuide, ...(stop.tips||[])].filter(Boolean).join(". ");
+  const fullText=[stop.description,stop.history,...(stop.audioSections||[]).map(s=>s.text),(stop.tips||[]).join(". ")].filter(Boolean).join(". ");
 
-  return (
-    <div style={{position:"fixed",inset:0,background:C.ink,zIndex:600,display:"flex",flexDirection:"column",overflowY:"hidden"}}>
-      {/* Header */}
-      <div style={{display:"flex",alignItems:"center",gap:"0.8rem",padding:"0.9rem 1.2rem",borderBottom:`1px solid ${C.border}`,background:C.card,flexShrink:0}}>
-        <button onClick={() => { stopAll(); onClose(); }} style={{width:36,height:36,borderRadius:"50%",border:`1px solid ${C.border}`,background:"transparent",color:"var(--parch)",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        <div style={{fontFamily:"var(--display)",fontSize:"1rem",color:C.ivory,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{stop.name}</div>
-        <ReadBtn text={allText} label="🔊 Leer" small />
-        <button onClick={loadDetail} style={{background:"transparent",border:`1px solid rgba(201,168,76,0.4)`,color:C.gold,fontFamily:"var(--serif)",fontSize:"0.72rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.35rem 0.8rem",cursor:"pointer",whiteSpace:"nowrap"}}>
-          ✦ Explorar
-        </button>
+  return <div style={{position:"fixed",inset:0,background:C.ink,zIndex:700,display:"flex",flexDirection:"column",overflowY:"hidden",animation:"fadeIn 0.25s ease"}}>
+    <style>{`
+      @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+      .detail-section{margin-bottom:1.8rem;}
+      .detail-section-title{font-family:var(--display);font-size:1.1rem;color:var(--gold);background:rgba(201,168,76,0.08);border-left:3px solid var(--gold);padding:0.5rem 0.9rem;margin-bottom:0.9rem;display:block;}
+      .detail-text p{font-size:0.95rem;line-height:1.9;color:var(--parch);font-weight:300;margin-bottom:0.9rem;}
+      .anecdote-card{background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0.8rem 0;}
+      .anecdote-title{font-size:0.65rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;display:block;}
+      .anecdote-text{font-style:italic;font-size:.9rem;color:var(--parch);line-height:1.75;}
+      .infographic{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin:.8rem 0;}
+      .info-box{background:var(--card);border:1px solid var(--border);padding:.9rem;text-align:center;}
+      .info-box-icon{font-size:1.4rem;display:block;margin-bottom:.2rem;}
+      .info-box-val{font-family:var(--display);font-size:1.3rem;color:var(--gold);display:block;}
+      .info-box-lbl{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--parch);opacity:.5;}
+      .timeline{display:flex;flex-direction:column;gap:0;}
+      .tl-item{display:flex;gap:.8rem;padding-bottom:1rem;}
+      .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:2.5rem;}
+      .tl-year{font-family:var(--display);font-size:.72rem;color:var(--gold);text-align:center;}
+      .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin:.3rem auto 0;flex-shrink:0;}
+      .tl-line{width:1px;flex:1;background:var(--border);margin-top:.2rem;min-height:.8rem;}
+      .tl-event{font-size:.88rem;color:var(--ivory);line-height:1.5;}
+      .tl-detail{font-size:.76rem;color:var(--parch);opacity:.6;font-style:italic;margin-top:.15rem;}
+    `}</style>
+
+    {/* Header */}
+    <div style={{display:"flex",alignItems:"center",gap:"0.7rem",padding:"0.8rem 1.1rem",borderBottom:`1px solid ${C.border}`,background:C.card,flexShrink:0,flexWrap:"wrap"}}>
+      <button onClick={()=>{stopAll();onClose();}} style={{width:34,height:34,borderRadius:"50%",border:`1px solid ${C.border}`,background:"transparent",color:C.parch,fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
+      <div style={{display:"flex",alignItems:"center",gap:"0.5rem",flex:1,minWidth:0}}>
+        <span style={{fontSize:"1.2rem"}}>{tm.icon}</span>
+        <div style={{fontFamily:"var(--display)",fontSize:"1rem",color:C.ivory,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{stop.name}</div>
       </div>
-
-      {/* Body */}
-      <div style={{flex:1,overflowY:"auto",padding:"1.5rem 1.2rem",WebkitOverflowScrolling:"touch"}}>
-        {/* Facts */}
-        {stop.facts && stop.facts.length > 0 && (
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"0.6rem",marginBottom:"1.5rem"}}>
-            {stop.facts.map((f,i) => (
-              <div key={i} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,padding:"0.8rem",textAlign:"center"}}>
-                <div style={{fontFamily:"var(--display)",fontSize:"1.3rem",color:C.gold}}>{f.value}</div>
-                <div style={{fontSize:"0.62rem",letterSpacing:"0.18em",textTransform:"uppercase",color:C.parch,opacity:0.5,marginTop:"0.1rem"}}>{f.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Description */}
-        <p style={{fontSize:"1rem",lineHeight:1.9,color:C.parch,marginBottom:"0.5rem",fontWeight:300}}>{stop.description}</p>
-        <ReadBtn text={stop.description} label="🔊 Descripción" small />
-
-        {/* History */}
-        {stop.history && (
-          <div style={{background:"rgba(201,168,76,0.05)",borderLeft:`2px solid ${C.gold}`,padding:"1rem 1.2rem",margin:"1.2rem 0 0.4rem"}}>
-            <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.4rem",fontFamily:"var(--display)"}}>📜 Historia</div>
-            <p style={{fontStyle:"italic",fontSize:"0.92rem",color:C.parch,lineHeight:1.75,opacity:0.87}}>{stop.history}</p>
-          </div>
-        )}
-        {stop.history && <ReadBtn text={stop.history} label="🔊 Historia" small />}
-
-        {/* Audio guide */}
-        {stop.audioGuide && (
-          <div style={{background:"rgba(201,168,76,0.04)",border:`1px solid ${C.border}`,padding:"1rem 1.2rem",margin:"1.2rem 0 0.4rem"}}>
-            <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.4rem",fontFamily:"var(--display)"}}>🎧 Audioguía</div>
-            <p style={{fontStyle:"italic",fontSize:"0.9rem",color:C.parch,lineHeight:1.75,opacity:0.8}}>{stop.audioGuide}</p>
-          </div>
-        )}
-        {stop.audioGuide && <ReadBtn text={stop.audioGuide} label="🔊 Audioguía" small />}
-
-        {/* Dishes */}
-        {stop.dishes && stop.dishes.length > 0 && (
-          <div style={{background:"rgba(181,84,27,0.07)",border:"1px solid rgba(181,84,27,0.22)",padding:"1rem 1.2rem",margin:"1.2rem 0"}}>
-            <div style={{fontSize:"0.68rem",letterSpacing:"0.35em",textTransform:"uppercase",color:C.terra,marginBottom:"0.8rem",fontFamily:"var(--display)"}}>🍽 Qué pedir</div>
-            {stop.dishes.map((d,i) => (
-              <div key={i} style={{borderBottom:i<stop.dishes.length-1?`1px dotted ${C.border}`:"none",paddingBottom:"0.4rem",marginBottom:"0.4rem"}}>
-                <div style={{fontFamily:"var(--display)",fontSize:"0.95rem",color:C.ivory}}>{d.name}</div>
-                <div style={{fontSize:"0.78rem",color:C.parch,opacity:0.6,fontStyle:"italic",marginTop:"0.1rem"}}>{d.description}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tips */}
-        {stop.tips && stop.tips.length > 0 && (
-          <div style={{marginTop:"1.2rem"}}>
-            <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.6rem",fontFamily:"var(--display)"}}>💡 Consejos</div>
-            <ul style={{listStyle:"none",display:"flex",flexDirection:"column",gap:"0.4rem"}}>
-              {stop.tips.map((t,i) => (
-                <li key={i} style={{display:"flex",gap:"0.5rem",alignItems:"flex-start",fontSize:"0.88rem",color:C.parch,opacity:0.75,lineHeight:1.5}}>
-                  <span style={{color:C.gold,fontSize:"0.45rem",marginTop:"0.4rem",flexShrink:0}}>◆</span>{t}
-                </li>
-              ))}
-            </ul>
-            <ReadBtn text={stop.tips.join(". ")} label="🔊 Consejos" small />
-          </div>
-        )}
-
-        {/* AI Detail */}
-        {(loading || detailContent || error) && (
-          <div style={{marginTop:"1.5rem",borderTop:`1px solid ${C.border}`,paddingTop:"1.5rem"}}>
-            <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"1rem",fontFamily:"var(--display)"}}>✦ Detalle expandido · IA</div>
-            {loading && (
-              <div style={{display:"flex",alignItems:"center",gap:"0.8rem",padding:"1rem",color:C.parch,opacity:0.6,fontStyle:"italic"}}>
-                <div style={{width:20,height:20,border:`1px solid ${C.gold}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
-                Generando contenido con IA…
-              </div>
-            )}
-            {error && <div style={{color:"#e84040",fontSize:"0.85rem",padding:"0.5rem"}}>{error}</div>}
-            {detailContent && (
-              <>
-                <style>{`
-                  .detail-section{margin-bottom:1.8rem;}
-                  .detail-section-title{font-family:var(--display);font-size:1.1rem;color:var(--gold);background:rgba(201,168,76,0.08);border-left:3px solid var(--gold);padding:0.5rem 0.9rem;margin-bottom:0.9rem;display:block;}
-                  .detail-text,.detail-text p{font-size:0.95rem;line-height:1.9;color:var(--parch);font-weight:300;background:transparent;margin-bottom:0.9rem;}
-                  .anecdote-card{background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);border-left:3px solid var(--gold);padding:1rem 1.2rem;margin:0.8rem 0;}
-                  .anecdote-title{font-size:0.65rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;display:block;}
-                  .anecdote-text{font-style:italic;font-size:0.9rem;color:var(--parch);line-height:1.75;}
-                  .infographic{display:grid;grid-template-columns:repeat(2,1fr);gap:0.7rem;margin:0.8rem 0;}
-                  .info-box{background:var(--card);border:1px solid var(--border);padding:0.9rem;text-align:center;}
-                  .info-box-icon{font-size:1.4rem;display:block;margin-bottom:0.2rem;}
-                  .info-box-val{font-family:var(--display);font-size:1.3rem;color:var(--gold);display:block;}
-                  .info-box-lbl{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--parch);opacity:0.5;}
-                  .timeline{display:flex;flex-direction:column;gap:0;}
-                  .tl-item{display:flex;gap:0.8rem;padding-bottom:1rem;}
-                  .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:2.5rem;}
-                  .tl-year{font-family:var(--display);font-size:0.72rem;color:var(--gold);text-align:center;}
-                  .tl-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0.3rem auto 0;flex-shrink:0;}
-                  .tl-line{width:1px;flex:1;background:var(--border);margin-top:0.2rem;min-height:0.8rem;}
-                  .tl-event{font-size:0.88rem;color:var(--ivory);line-height:1.5;}
-                  .tl-detail{font-size:0.76rem;color:var(--parch);opacity:0.6;font-style:italic;margin-top:0.15rem;}
-                  @keyframes spin{to{transform:rotate(360deg)}}
-                `}</style>
-                <div dangerouslySetInnerHTML={{__html: detailContent}} />
-                <ReadBtn text={document.querySelector('.detail-text')?.innerText || ""} label="🔊 Leer todo" />
-              </>
-            )}
-          </div>
-        )}
+      <div style={{display:"flex",gap:"0.4rem",flexShrink:0,flexWrap:"wrap"}}>
+        <ReadBtn text={fullText} label="🔊" small/>
+        <button onClick={loadAI} style={{background:"transparent",border:`1px solid rgba(201,168,76,0.4)`,color:C.gold,fontFamily:"var(--serif)",fontSize:"0.72rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.3rem 0.7rem",cursor:"pointer",whiteSpace:"nowrap"}}>✦ Explorar</button>
       </div>
     </div>
-  );
+
+    {/* Body */}
+    <div style={{flex:1,overflowY:"auto",padding:"1.2rem 1.1rem",WebkitOverflowScrolling:"touch"}}>
+
+      {/* Restaurant actions */}
+      {isRest&&<div style={{background:"rgba(232,64,64,0.07)",border:"1px solid rgba(232,64,64,0.2)",padding:"1rem 1.1rem",marginBottom:"1.2rem",display:"flex",flexWrap:"wrap",gap:"0.6rem",alignItems:"center"}}>
+        <div style={{flex:1}}>
+          {stop.phone&&<div style={{fontSize:"0.85rem",color:C.parch,marginBottom:"0.2rem"}}>📞 <a href={`tel:${stop.phone}`} style={{color:C.parch,textDecoration:"none"}}>{stop.phone}</a></div>}
+          {stop.priceRange&&<div style={{fontSize:"0.78rem",color:C.gold,letterSpacing:"0.1em"}}>{stop.priceRange}</div>}
+        </div>
+        {stop.website&&<a href={stop.website} target="_blank" rel="noopener" style={{display:"inline-flex",alignItems:"center",gap:"0.3rem",background:"transparent",border:`1px solid rgba(232,64,64,0.5)`,color:"#E84040",fontFamily:"var(--serif)",fontSize:"0.78rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.4rem 0.8rem",textDecoration:"none"}}>🌐 Web</a>}
+        {stop.bookingUrl&&<a href={stop.bookingUrl} target="_blank" rel="noopener" style={{display:"inline-flex",alignItems:"center",gap:"0.3rem",background:"#E84040",border:"none",color:"white",fontFamily:"var(--serif)",fontSize:"0.78rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.4rem 0.8rem",textDecoration:"none"}}>🗓 Reservar</a>}
+        {stop.lat&&stop.lng&&<DirectionsBtn lat={stop.lat} lng={stop.lng} name={stop.name} small/>}
+      </div>}
+
+      {/* Directions for non-restaurant */}
+      {!isRest&&stop.lat&&stop.lng&&<div style={{marginBottom:"1rem"}}>
+        <DirectionsBtn lat={stop.lat} lng={stop.lng} name={stop.name}/>
+        {stop.address&&<div style={{fontSize:"0.78rem",color:C.parch,opacity:0.55,marginTop:"0.4rem"}}>📍 {stop.address}</div>}
+      </div>}
+
+      {/* YouTube video */}
+      {stop.videoUrl&&getYTId(stop.videoUrl)&&<div style={{marginBottom:"1rem"}}>
+        <div style={{fontSize:"0.68rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.5rem",fontFamily:"var(--display)"}}>▶ Vídeo</div>
+        <YouTubeEmbed url={stop.videoUrl} title={stop.name}/>
+      </div>}
+
+      {/* Photos gallery */}
+      {stop.photos&&stop.photos.length>0&&<div style={{marginBottom:"1.2rem"}}>
+        <PhotoGallery photos={stop.photos} name={stop.name}/>
+      </div>}
+
+      {/* Facts */}
+      {stop.facts&&stop.facts.length>0&&<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"0.6rem",marginBottom:"1.2rem"}}>
+        {stop.facts.map((f,i)=><div key={i} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,padding:"0.8rem",textAlign:"center"}}>
+          <div style={{fontFamily:"var(--display)",fontSize:"1.25rem",color:C.gold}}>{f.value}</div>
+          <div style={{fontSize:"0.62rem",letterSpacing:"0.18em",textTransform:"uppercase",color:C.parch,opacity:0.5,marginTop:"0.1rem"}}>{f.label}</div>
+        </div>)}
+      </div>}
+
+      {/* Description */}
+      <p style={{fontSize:"1rem",lineHeight:1.9,color:C.parch,marginBottom:"0.4rem",fontWeight:300}}>{stop.description}</p>
+      <ReadBtn text={stop.description} label="🔊 Descripción" small/>
+
+      {/* History */}
+      {stop.history&&<>
+        <div style={{background:"rgba(201,168,76,0.05)",borderLeft:`2px solid ${C.gold}`,padding:"0.9rem 1.1rem",margin:"1rem 0 0.4rem"}}>
+          <div style={{fontSize:"0.65rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.4rem",fontFamily:"var(--display)"}}>📜 Historia</div>
+          <p style={{fontStyle:"italic",fontSize:"0.92rem",color:C.parch,lineHeight:1.75,opacity:0.87}}>{stop.history}</p>
+        </div>
+        <ReadBtn text={stop.history} label="🔊 Historia" small/>
+      </>}
+
+      {/* Audio sections */}
+      <AudioSections sections={stop.audioSections} stopName={stop.name}/>
+
+      {/* Dishes */}
+      {stop.dishes&&stop.dishes.length>0&&<div style={{background:"rgba(232,64,64,0.07)",border:"1px solid rgba(232,64,64,0.2)",padding:"1rem 1.1rem",margin:"1rem 0"}}>
+        <div style={{fontSize:"0.65rem",letterSpacing:"0.35em",textTransform:"uppercase",color:"#E84040",marginBottom:"0.8rem",fontFamily:"var(--display)"}}>🍽 Qué pedir</div>
+        {stop.dishes.map((d,i)=><div key={i} style={{borderBottom:i<stop.dishes.length-1?`1px dotted ${C.border}`:"none",paddingBottom:"0.4rem",marginBottom:"0.4rem"}}>
+          <div style={{fontFamily:"var(--display)",fontSize:"0.95rem",color:C.ivory}}>{d.name}</div>
+          <div style={{fontSize:"0.78rem",color:C.parch,opacity:0.6,fontStyle:"italic",marginTop:"0.1rem"}}>{d.description}</div>
+        </div>)}
+      </div>}
+
+      {/* Tips */}
+      {stop.tips&&stop.tips.length>0&&<div style={{marginTop:"1rem"}}>
+        <div style={{fontSize:"0.65rem",letterSpacing:"0.3em",textTransform:"uppercase",color:C.gold,marginBottom:"0.5rem",fontFamily:"var(--display)"}}>💡 Consejos</div>
+        <ul style={{listStyle:"none",display:"flex",flexDirection:"column",gap:"0.4rem"}}>
+          {stop.tips.map((t,i)=><li key={i} style={{display:"flex",gap:"0.5rem",alignItems:"flex-start",fontSize:"0.88rem",color:C.parch,opacity:0.75,lineHeight:1.5}}>
+            <span style={{color:C.gold,fontSize:"0.45rem",marginTop:"0.4rem",flexShrink:0}}>◆</span>{t}
+          </li>)}
+        </ul>
+        <ReadBtn text={stop.tips.join(". ")} label="🔊 Consejos" small/>
+      </div>}
+
+      {/* Website link (non-restaurant) */}
+      {!isRest&&stop.website&&<a href={stop.website} target="_blank" rel="noopener" style={{display:"inline-flex",alignItems:"center",gap:"0.4rem",marginTop:"1rem",border:`1px solid ${C.border}`,color:C.gold,fontFamily:"var(--serif)",fontSize:"0.78rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.4rem 0.9rem",textDecoration:"none"}}>🌐 Sitio web oficial</a>}
+
+      {/* AI Detail */}
+      <div style={{marginTop:"1.5rem",borderTop:`1px solid ${C.border}`,paddingTop:"1.5rem"}}>
+        {!aiContent&&!aiLoading&&!aiErr&&<button onClick={loadAI} style={{display:"flex",alignItems:"center",gap:"0.6rem",background:"rgba(201,168,76,0.05)",border:`1px solid ${C.border}`,color:C.gold,fontFamily:"var(--serif)",fontSize:"0.82rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"0.7rem 1.2rem",cursor:"pointer",width:"100%",justifyContent:"center"}}>✦ Explorar historia completa con IA</button>}
+        {aiLoading&&<div style={{display:"flex",alignItems:"center",gap:"0.8rem",padding:"1rem",color:C.parch,opacity:0.6,fontStyle:"italic"}}>
+          <div style={{width:20,height:20,border:`1px solid ${C.gold}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>Generando contenido con IA…
+        </div>}
+        {aiErr&&<div style={{color:"#e84040",fontSize:"0.85rem",padding:"0.5rem"}}>{aiErr}</div>}
+        {aiContent&&<div dangerouslySetInnerHTML={{__html:aiContent}}/>}
+        {aiContent&&<ReadBtn text={document.querySelector&&document.querySelector(".detail-text")?.innerText||""} label="🔊 Leer todo" style={{marginTop:"0.8rem"}}/>}
+      </div>
+    </div>
+  </div>;
+}
+
+// ── PHOTO GALLERY ─────────────────────────────────────────────────────────────
+function PhotoGallery({photos,name}){
+  const [main,setMain]=useState(0);
+  const [lb,setLb]=useState(false);
+  if(!photos||!photos.length)return null;
+  return <div>
+    <div style={{position:"relative",height:220,overflow:"hidden",background:"#080d14",cursor:"zoom-in"}} onClick={()=>setLb(true)}>
+      <img src={photos[main]} alt={name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}/>
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 60%,rgba(13,17,23,0.7))"}}/>
+      <div style={{position:"absolute",bottom:"0.5rem",right:"0.6rem",fontSize:"0.65rem",color:C.gold,letterSpacing:"0.1em",opacity:0.7}}>🔍 Ampliar</div>
+    </div>
+    {photos.length>1&&<div style={{display:"flex",gap:"0.3rem",marginTop:"0.3rem",overflowX:"auto",scrollbarWidth:"none"}}>
+      {photos.map((p,i)=><img key={i} src={p} alt="" onClick={()=>setMain(i)} style={{width:60,height:45,objectFit:"cover",cursor:"pointer",opacity:main===i?1:0.45,border:`1px solid ${main===i?C.gold:"transparent"}`,flexShrink:0,transition:"all .2s"}}/>)}
+    </div>}
+    {lb&&<div onClick={()=>setLb(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <img src={photos[main]} alt={name} style={{maxWidth:"95vw",maxHeight:"90vh",objectFit:"contain"}}/>
+      <button onClick={()=>setLb(false)} style={{position:"absolute",top:"1rem",right:"1rem",background:"none",border:`1px solid ${C.gold}`,color:C.gold,width:36,height:36,cursor:"pointer",fontSize:"1.1rem",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+    </div>}
+  </div>;
 }
 
 // ── STOP CARD ─────────────────────────────────────────────────────────────────
-function StopCard({ stop, index, onOpen }) {
-  const color = stop.color || TYPE_COLORS[stop.type] || C.gold;
-  const photo = stop.photos && stop.photos[0];
-
-  return (
-    <div style={{background:C.card,border:`1px solid ${C.border}`,overflow:"hidden",cursor:"pointer"}} onClick={() => onOpen(stop)}>
-      {/* Photo or placeholder */}
-      <div style={{height:140,overflow:"hidden",position:"relative",background:"#080d14"}}>
-        {photo ? (
-          <img src={photo} alt={stop.name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.85,transition:"transform 0.4s"}}
-            onMouseOver={e=>e.target.style.transform="scale(1.05)"} onMouseOut={e=>e.target.style.transform="scale(1)"} />
-        ) : (
-          <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",opacity:0.15}}>
-            <div style={{fontFamily:"var(--display)",fontSize:"4rem",color:color}}>{String(index+1).padStart(2,"0")}</div>
-          </div>
-        )}
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 50%,rgba(13,17,23,0.85))"}} />
-        <div style={{position:"absolute",bottom:"0.6rem",left:"0.7rem",fontSize:"0.68rem",letterSpacing:"0.3em",color:color,textTransform:"uppercase"}}>{stop.time} · {stop.duration}</div>
-        <div style={{position:"absolute",top:"0.6rem",left:"0.7rem",width:26,height:26,borderRadius:"50%",background:color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.72rem",fontWeight:700,color:C.ink}}>{index+1}</div>
+function StopCard({stop,index,onOpen}){
+  const tm=tmeta(stop.type);
+  const photo=stop.photos&&stop.photos[0];
+  const isRest=stop.type==="restaurant";
+  return <div style={{background:C.card,border:`1px solid ${C.border}`,overflow:"hidden",cursor:"pointer",transition:"border .2s"}}
+    onClick={()=>onOpen(stop)} onMouseOver={e=>e.currentTarget.style.borderColor="rgba(201,168,76,0.4)"} onMouseOut={e=>e.currentTarget.style.borderColor=C.border}>
+    <div style={{height:130,overflow:"hidden",position:"relative",background:"#080d14"}}>
+      {photo?<img src={photo} alt={stop.name} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.85}}/>
+        :<div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2.5rem",opacity:0.15}}>{tm.icon}</div>}
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 50%,rgba(13,17,23,0.85))"}}/>
+      <div style={{position:"absolute",top:"0.5rem",left:"0.6rem",width:isRest?30:26,height:isRest?30:26,
+        borderRadius:isRest?"4px":"50%",background:tm.color,display:"flex",alignItems:"center",justifyContent:"center",
+        fontSize:isRest?"1rem":"0.7rem",fontWeight:700,color:C.ink}}>
+        {isRest?tm.icon:index+1}
       </div>
-      <div style={{padding:"0.9rem"}}>
-        <div style={{fontSize:"0.65rem",letterSpacing:"0.35em",textTransform:"uppercase",color:color,marginBottom:"0.25rem"}}>{stop.type}</div>
-        <div style={{fontFamily:"var(--display)",fontSize:"1.05rem",color:C.ivory,marginBottom:"0.2rem"}}>{stop.name}</div>
-        <div style={{fontStyle:"italic",fontSize:"0.82rem",color:C.parch,opacity:0.7,lineHeight:1.4}}>{stop.subtitle}</div>
-      </div>
+      <div style={{position:"absolute",bottom:"0.5rem",left:"0.6rem",fontSize:"0.65rem",color:tm.color,letterSpacing:"0.15em",textTransform:"uppercase"}}>{stop.time}{stop.time&&stop.duration?" · ":""}{stop.duration}</div>
     </div>
-  );
+    <div style={{padding:"0.8rem 0.9rem"}}>
+      <div style={{fontSize:"0.62rem",letterSpacing:"0.35em",textTransform:"uppercase",color:tm.color,marginBottom:"0.2rem"}}>{tm.icon} {tm.label}</div>
+      <div style={{fontFamily:"var(--display)",fontSize:"1rem",color:C.ivory,marginBottom:"0.15rem"}}>{stop.name}</div>
+      <div style={{fontStyle:"italic",fontSize:"0.8rem",color:C.parch,opacity:0.65,lineHeight:1.4}}>{stop.subtitle}</div>
+      {isRest&&stop.priceRange&&<div style={{fontSize:"0.72rem",color:tm.color,marginTop:"0.3rem"}}>{stop.priceRange}</div>}
+    </div>
+  </div>;
 }
 
 // ── HERO ──────────────────────────────────────────────────────────────────────
-function Hero({ meta }) {
-  return (
-    <div style={{minHeight:"100vh",position:"relative",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",overflow:"hidden"}}>
-      <div style={{
-        position:"absolute",inset:0,
-        background: meta.heroImage ? `url(${meta.heroImage}) center/cover no-repeat` : "radial-gradient(ellipse at center, #2a1505 0%, #050208 100%)",
-        filter:"brightness(0.3) saturate(0.7)",
-      }} />
-      <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at center,transparent 30%,#0D1117 100%)"}} />
-      <div style={{position:"relative",zIndex:2,padding:"2rem 1.5rem",maxWidth:700}}>
-        <div style={{fontSize:"0.72rem",letterSpacing:"0.55em",color:C.gold,textTransform:"uppercase",marginBottom:"1.2rem",opacity:0.9}}>
-          Guía Turística Interactiva
-        </div>
-        <h1 style={{fontFamily:"var(--display)",fontSize:"clamp(3rem,10vw,7rem)",lineHeight:0.95,color:C.ivory}}>
-          {meta.title}<br/><em style={{color:C.gold,fontStyle:"italic"}}>{meta.subtitle}</em>
-        </h1>
-        <p style={{fontStyle:"italic",fontSize:"clamp(0.95rem,2.5vw,1.25rem)",color:C.parch,maxWidth:560,margin:"1.8rem auto 2.5rem",lineHeight:1.85,opacity:0.85}}>
-          {meta.description}
-        </p>
-        <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
-          <a href="#tour" style={{display:"inline-flex",alignItems:"center",gap:"0.5rem",border:`1px solid ${C.gold}`,color:C.gold,background:"transparent",fontFamily:"var(--serif)",fontSize:"0.88rem",letterSpacing:"0.3em",textTransform:"uppercase",padding:"0.9rem 2.2rem",textDecoration:"none",transition:"all 0.3s"}}
-            onMouseOver={e=>{e.target.style.background=C.gold;e.target.style.color=C.ink;}} onMouseOut={e=>{e.target.style.background="transparent";e.target.style.color=C.gold;}}>
-            ▶ Comenzar visita
-          </a>
-          <a href="#map" style={{display:"inline-flex",alignItems:"center",gap:"0.5rem",border:`1px solid rgba(201,168,76,0.35)`,color:C.parch,background:"transparent",fontFamily:"var(--serif)",fontSize:"0.88rem",letterSpacing:"0.3em",textTransform:"uppercase",padding:"0.9rem 2.2rem",textDecoration:"none"}}>
-            ▼ Ver mapa
-          </a>
-        </div>
+function Hero({meta}){
+  return <div style={{minHeight:"100vh",position:"relative",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:0,background:meta.heroImage?`url(${meta.heroImage}) center/cover no-repeat`:"radial-gradient(ellipse at center, #2a1505 0%, #050208 100%)",filter:"brightness(0.3) saturate(0.7)"}}/>
+    <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at center,transparent 30%,#0D1117 100%)"}}/>
+    <div style={{position:"relative",zIndex:2,padding:"2rem 1.5rem",maxWidth:700}}>
+      <div style={{fontSize:"0.72rem",letterSpacing:"0.55em",color:C.gold,textTransform:"uppercase",marginBottom:"1.2rem",opacity:0.9}}>Guía Turística Interactiva</div>
+      <h1 style={{fontFamily:"var(--display)",fontSize:"clamp(3rem,10vw,7rem)",lineHeight:0.95,color:C.ivory}}>
+        {meta.title||"Mi Tour"}<br/><em style={{color:C.gold,fontStyle:"italic"}}>{meta.subtitle}</em>
+      </h1>
+      <p style={{fontStyle:"italic",fontSize:"clamp(0.95rem,2.5vw,1.25rem)",color:C.parch,maxWidth:560,margin:"1.8rem auto 2rem",lineHeight:1.85,opacity:0.85}}>{meta.description}</p>
+      {meta.videoUrl&&getYTId(meta.videoUrl)&&<div style={{marginBottom:"1.5rem",maxWidth:560,margin:"1rem auto 2rem"}}><YouTubeEmbed url={meta.videoUrl} title={meta.title}/></div>}
+      <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
+        <a href="#map" style={{display:"inline-flex",alignItems:"center",gap:"0.5rem",border:`1px solid ${C.gold}`,color:C.gold,background:"transparent",fontFamily:"var(--serif)",fontSize:"0.88rem",letterSpacing:"0.3em",textTransform:"uppercase",padding:"0.9rem 2.2rem",textDecoration:"none"}}>▼ Ver mapa</a>
+        <a href="#stops" style={{display:"inline-flex",alignItems:"center",border:`1px solid rgba(201,168,76,0.35)`,color:C.parch,background:"transparent",fontFamily:"var(--serif)",fontSize:"0.88rem",letterSpacing:"0.3em",textTransform:"uppercase",padding:"0.9rem 2.2rem",textDecoration:"none"}}>▶ Comenzar</a>
       </div>
     </div>
-  );
+  </div>;
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
-function App() {
-  const [tour, setTour] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [activeDay, setActiveDay] = useState(0);
-  const [openStop, setOpenStop] = useState(null);
+// ── APP ───────────────────────────────────────────────────────────────────────
+function App(){
+  const [tour,setTour]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState("");
+  const [activeDay,setActiveDay]=useState(0);
+  const [openStop,setOpenStop]=useState(null);
 
-  useEffect(() => {
-    // Load from same domain first (works always on Netlify)
-    // Fall back to GitHub raw URL if not found locally
-    const localUrl = "/data/tour.json?t=" + Date.now();
-    fetch(localUrl)
-      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(data => { setTour(data); setLoading(false); })
-      .catch(() => {
-        // Try GitHub raw URL as fallback
-        const ghUrl = RAW_BASE + "/data/tour.json?t=" + Date.now();
-        fetch(ghUrl)
-          .then(r => { if (!r.ok) throw new Error("No se encontró data/tour.json (HTTP " + r.status + "). Sube el fichero al repo de GitHub."); return r.json(); })
-          .then(data => { setTour(data); setLoading(false); })
-          .catch(e => { setError(e.message); setLoading(false); });
+  useEffect(()=>{
+    fetch("/data/tour.json?t="+Date.now())
+      .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+      .then(d=>{setTour(d);setLoading(false);})
+      .catch(()=>{
+        fetch("https://raw.githubusercontent.com/cjlara/protour-app/main/data/tour.json?t="+Date.now())
+          .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+          .then(d=>{setTour(d);setLoading(false);})
+          .catch(e=>{setError(e.message);setLoading(false);});
       });
-  }, []);
+    if(window.speechSynthesis)window.speechSynthesis.getVoices();
+  },[]);
 
-  useEffect(() => {
-    if (window.speechSynthesis) window.speechSynthesis.getVoices();
-  }, []);
+  useEffect(()=>{
+    const h=e=>{
+      const id=e.detail;
+      const all=(tour?.days||[]).flatMap(d=>d.stops||[]);
+      const s=all.find(x=>x.id===id);
+      if(s)setOpenStop(s);
+    };
+    document.addEventListener("openStop",h);
+    return()=>document.removeEventListener("openStop",h);
+  },[tour]);
 
-  if (loading) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",flexDirection:"column",gap:"1rem"}}>
-      <div style={{width:40,height:40,border:`2px solid rgba(201,168,76,0.3)`,borderTopColor:C.gold,borderRadius:"50%",animation:"spin 0.9s linear infinite"}} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{fontStyle:"italic",color:C.parch,opacity:0.5}}>Cargando ruta…</div>
+  if(loading)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",flexDirection:"column",gap:"1rem"}}>
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <div style={{width:40,height:40,border:`2px solid rgba(201,168,76,0.3)`,borderTopColor:C.gold,borderRadius:"50%",animation:"spin 0.9s linear infinite"}}/>
+    <div style={{fontStyle:"italic",color:C.parch,opacity:0.5}}>Cargando ruta…</div>
+  </div>;
+
+  if(error||!tour)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:C.parch,flexDirection:"column",gap:"0.5rem",padding:"2rem",textAlign:"center"}}>
+    <div style={{fontSize:"1.2rem",color:C.gold}}>No se pudo cargar la ruta</div>
+    <div style={{opacity:0.6,fontSize:"0.9rem"}}>{error}</div>
+  </div>;
+
+  const days=tour.days||[];
+  const day=days[activeDay]||days[0];
+  const allStops=days.flatMap(d=>d.stops||[]).filter(s=>s.lat&&s.lng);
+
+  return <>
+    <Hero meta={tour.meta||{}}/>
+    {days.length>1&&<div id="days" style={{borderBottom:`1px solid ${C.border}`,background:C.card}}>
+      <div style={{display:"flex",overflowX:"auto",scrollbarWidth:"none",maxWidth:1200,margin:"0 auto"}}>
+        {days.map((d,i)=><button key={d.id} onClick={()=>setActiveDay(i)} style={{flexShrink:0,background:"transparent",border:"none",borderBottom:`2px solid ${activeDay===i?C.gold:"transparent"}`,color:activeDay===i?C.gold:C.parch,fontFamily:"var(--serif)",fontSize:"0.8rem",letterSpacing:"0.2em",textTransform:"uppercase",padding:"1rem 1.5rem",cursor:"pointer",opacity:activeDay===i?1:0.6}}>{d.title||"Día "+(i+1)}</button>)}
+      </div>
+    </div>}
+
+    <div id="map" style={{padding:"4rem 1.5rem 2.5rem",background:C.ink,borderTop:`1px solid ${C.border}`}}>
+      <div style={{textAlign:"center",marginBottom:"2rem"}}>
+        <div style={{fontSize:"0.72rem",letterSpacing:"0.5em",textTransform:"uppercase",color:C.terra,marginBottom:"0.4rem"}}>Ruta completa · 1 día</div>
+        <h2 style={{fontFamily:"var(--display)",fontSize:"clamp(1.8rem,4vw,2.8rem)",color:C.ivory}}>{day?.title||"Mapa de la ruta"}</h2>
+      </div>
+      <TourMap allStops={allStops} activeDay={day} onSelectStop={id=>{const s=allStops.find(x=>x.id===id);if(s)setOpenStop(s);}}/>
     </div>
-  );
 
-  if (error || !tour) return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:C.parch,flexDirection:"column",gap:"0.5rem",padding:"2rem",textAlign:"center"}}>
-      <div style={{fontSize:"1.2rem",color:C.gold}}>No se pudo cargar la ruta</div>
-      <div style={{opacity:0.6,fontSize:"0.9rem"}}>{error}</div>
+    <div id="stops" style={{padding:"2.5rem 1.5rem",maxWidth:1200,margin:"0 auto"}}>
+      {day?.description&&<p style={{textAlign:"center",fontStyle:"italic",color:C.parch,opacity:0.65,marginBottom:"2rem",fontSize:"1rem"}}>{day.description}</p>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"1rem"}}>
+        {(day?.stops||[]).map((stop,i)=><StopCard key={stop.id} stop={stop} index={i} onOpen={setOpenStop}/>)}
+      </div>
     </div>
-  );
 
-  const days = tour.days || [];
-  const day = days[activeDay] || days[0];
-  const allStops = days.flatMap(d => d.stops || []).filter(s => s.lat && s.lng);
+    {openStop&&<StopPanel stop={openStop} onClose={()=>setOpenStop(null)}/>}
 
-  return (
-    <>
-      <Hero meta={tour.meta || {}} />
-
-      {/* Day tabs */}
-      {days.length > 1 && (
-        <div id="tour" style={{borderBottom:`1px solid ${C.border}`,background:C.card}}>
-          <div style={{display:"flex",overflowX:"auto",scrollbarWidth:"none",maxWidth:1200,margin:"0 auto"}}>
-            {days.map((d,i) => (
-              <button key={d.id} onClick={() => setActiveDay(i)} style={{
-                flexShrink:0, background:"transparent", border:"none",
-                borderBottom: activeDay===i ? `2px solid ${C.gold}` : "2px solid transparent",
-                color: activeDay===i ? C.gold : C.parch,
-                fontFamily:"var(--serif)", fontSize:"0.8rem", letterSpacing:"0.2em",
-                textTransform:"uppercase", padding:"1rem 1.5rem", cursor:"pointer",
-                transition:"all 0.2s", opacity: activeDay===i ? 1 : 0.6,
-              }}>
-                {d.title || "Día " + (i+1)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Map */}
-      <div id="map" style={{padding:"4rem 1.5rem 3rem",background:C.ink,borderTop:`1px solid ${C.border}`}}>
-        <div style={{textAlign:"center",marginBottom:"2rem"}}>
-          <div style={{fontSize:"0.72rem",letterSpacing:"0.5em",textTransform:"uppercase",color:C.terra,marginBottom:"0.4rem"}}>Ruta completa</div>
-          <h2 style={{fontFamily:"var(--display)",fontSize:"clamp(1.8rem,4vw,2.8rem)",color:C.ivory}}>{day?.title || "Mapa de la ruta"}</h2>
-        </div>
-        <TourMap stops={allStops} activeDay={day} onSelectStop={(id) => {
-          const s = allStops.find(s => s.id === id);
-          if (s) { setOpenStop(s); }
-        }} />
-      </div>
-
-      {/* Stops grid */}
-      <div id="stops" style={{padding:"3rem 1.5rem",maxWidth:1200,margin:"0 auto"}}>
-        {day?.description && <p style={{textAlign:"center",fontStyle:"italic",color:C.parch,opacity:0.65,marginBottom:"2rem",fontSize:"1rem"}}>{day.description}</p>}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"1.2rem"}}>
-          {(day?.stops || []).map((stop, i) => (
-            <StopCard key={stop.id} stop={stop} index={i} onOpen={setOpenStop} />
-          ))}
-        </div>
-      </div>
-
-      {/* Detail panel */}
-      {openStop && <DetailPanel stop={openStop} onClose={() => setOpenStop(null)} />}
-
-      {/* Admin fab */}
-      <a href="/admin.html" style={{
-        position:"fixed", bottom:"1.5rem", right:"1.5rem", zIndex:200,
-        background:`rgba(13,17,23,0.95)`, border:`1px solid ${C.gold}`,
-        color:C.gold, textDecoration:"none", fontFamily:"var(--serif)",
-        fontSize:"0.72rem", letterSpacing:"0.2em", textTransform:"uppercase",
-        padding:"0.65rem 1rem", display:"flex", alignItems:"center", gap:"0.4rem",
-        boxShadow:"0 4px 20px rgba(0,0,0,0.4)", transition:"all 0.2s",
-      }} onMouseOver={e=>{e.currentTarget.style.background=C.gold;e.currentTarget.style.color=C.ink;}}
-         onMouseOut={e=>{e.currentTarget.style.background="rgba(13,17,23,0.95)";e.currentTarget.style.color=C.gold;}}>
-        ⚙ Admin
-      </a>
-
-      {/* Version */}
-      <div style={{textAlign:"center",padding:"2rem",fontSize:"0.65rem",color:C.parch,opacity:0.25,letterSpacing:"0.2em"}}>
-        v3.0 · Tour Guiado App
-      </div>
-    </>
-  );
+    <a href="/admin.html" style={{position:"fixed",bottom:"1.5rem",right:"1.5rem",zIndex:200,background:"rgba(13,17,23,0.95)",border:`1px solid ${C.gold}`,color:C.gold,textDecoration:"none",fontFamily:"var(--serif)",fontSize:"0.72rem",letterSpacing:"0.2em",textTransform:"uppercase",padding:"0.65rem 1rem",display:"flex",alignItems:"center",gap:"0.4rem",boxShadow:"0 4px 20px rgba(0,0,0,0.4)"}}>⚙ Admin</a>
+    <div style={{textAlign:"center",padding:"2rem",fontSize:"0.65rem",color:C.parch,opacity:0.2,letterSpacing:"0.2em"}}>v3.1 · Tour Guiado App</div>
+  </>;
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
 </script>
 </body>
 </html>

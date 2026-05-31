@@ -618,18 +618,27 @@ function initDrag(){
 
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 async function saveTour(){
-  // Auto-apply any open stop editor before saving
+  // Apply meta fields if visible
+  if(document.getElementById('m-title')) updateMeta();
+  
+  // If stop editor is open, force-apply its fields first
   if(editIdx!==null && activeDay && activeDay.stops && activeDay.stops[editIdx]){
     _readStopFields(activeDay.stops[editIdx]);
   }
-  // Auto-apply meta fields if visible
-  if(document.getElementById('m-title')) updateMeta();
+
+  // Show what we're about to save
+  var totalStops = (tour.days||[]).reduce(function(a,d){return a+(d.stops||[]).length;},0);
+  var stopsWithPhotos = (tour.days||[]).flatMap(function(d){return d.stops||[];}).filter(function(s){return s.photos&&s.photos.length>0;}).length;
+  var stopsWithVideo = (tour.days||[]).flatMap(function(d){return d.stops||[];}).filter(function(s){return s.videoUrl&&s.videoUrl.length>0;}).length;
+  console.log('[saveTour] Saving: '+totalStops+' stops, '+stopsWithPhotos+' with photos, '+stopsWithVideo+' with video');
 
   var btn=document.getElementById('save-btn');
   btn.disabled=true;btn.textContent='⏳ Guardando…';
   try{
     tour.meta.updatedAt=new Date().toISOString();
-    var r=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:JSON.stringify({tourData:tour})});
+    var payload = JSON.stringify({tourData:tour});
+    console.log('[saveTour] Payload size: '+payload.length+' chars');
+    var r=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:payload});
     var d=await r.json();
     if(d.error)throw new Error(d.error);
     dirty=false;
@@ -648,11 +657,19 @@ async function saveTour(){
         })
         .catch(function(e){toast('Guardado en GitHub (verificación falló: '+e.message+')','ok');});
       btn.textContent='💾 Guardar';btn.disabled=true;
+    btn.style.background='';btn.style.borderColor='';
     },1500);
   }catch(e){btn.textContent='💾 Guardar';btn.disabled=false;toast('Error: '+e.message,'err');}
 }
 
-function markDirty(){dirty=true;document.getElementById('save-btn').disabled=false;}
+function markDirty(){
+  dirty=true;
+  var btn=document.getElementById('save-btn');
+  btn.disabled=false;
+  btn.textContent='💾 Guardar cambios';
+  btn.style.background='#E84040';
+  btn.style.borderColor='#E84040';
+}
 
 var tt;
 function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'ok');clearTimeout(tt);tt=setTimeout(function(){el.className='';},3200);}

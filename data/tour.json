@@ -39,21 +39,30 @@
             {
               "id": "as-2",
               "title": "El bosque de columnas",
-              "text": "Imagina el año 786. Abd al-Rahman el Primero levanta este bosque de columnas. Cada columna cuenta una historia diferente: algunas vienen de templos romanos, otras de palacios visigodos. Los arcos bicolores en rojo y blanco son únicos en la arquitectura mundial.",
+              "text": "Imagina el año 786. Abd al-Rahman el Primero levanta este bosque de columnas. Cada columna cuenta una historia diferente: algunas vienen de templos romanos, otras de palacios visigodos.",
               "mapImage": ""
             },
             {
               "id": "as-3",
               "title": "El Mihrab",
-              "text": "El mihrab es el corazón espiritual de la mezquita. Esta hornacina señala la dirección de La Meca. Observa los mosaicos de oro y el arco de herradura lobulado. Fue construido por artesanos enviados desde Constantinopla.",
+              "text": "El mihrab es el corazón espiritual de la mezquita. Esta hornacina señala la dirección de La Meca. Observa los mosaicos de oro y el arco de herradura lobulado.",
               "mapImage": ""
             }
           ],
-          "videoUrl": "https://www.youtube.com/watch?v=example1",
+          "videoUrl": "",
           "facts": [
-            { "value": "784", "label": "Año fundación" },
-            { "value": "856", "label": "Columnas" },
-            { "value": "23.400m²", "label": "Superficie" }
+            {
+              "value": "784",
+              "label": "Año fundación"
+            },
+            {
+              "value": "856",
+              "label": "Columnas"
+            },
+            {
+              "value": "23.400m²",
+              "label": "Superficie"
+            }
           ],
           "tips": [
             "Compra la entrada online — las colas pueden ser de más de una hora",
@@ -72,7 +81,7 @@
           "time": "13:00",
           "duration": "90 min",
           "type": "restaurant",
-          "color": "#B5541B",
+          "color": "#E84040",
           "name": "Taberna La Viuda",
           "location": "Córdoba, España",
           "lat": 37.8753,
@@ -85,15 +94,24 @@
             {
               "id": "as-r1",
               "title": "Los platos imprescindibles",
-              "text": "El salmorejo cordobés es la estrella. Más espeso que el gazpacho, elaborado con tomate, pan, ajo y aceite de oliva. Se corona con jamón ibérico y huevo duro. El flamenquín, rulo de jamón y lomo empanado, es la otra tapa emblemática.",
+              "text": "El salmorejo cordobés es la estrella. Más espeso que el gazpacho, elaborado con tomate, pan, ajo y aceite de oliva. Se corona con jamón ibérico y huevo duro.",
               "mapImage": ""
             }
           ],
           "videoUrl": "",
           "facts": [
-            { "value": "4.6★", "label": "Valoración" },
-            { "value": "13-16h", "label": "Horario" },
-            { "value": "€€", "label": "Precio medio" }
+            {
+              "value": "4.6★",
+              "label": "Valoración"
+            },
+            {
+              "value": "13-16h",
+              "label": "Horario"
+            },
+            {
+              "value": "€€",
+              "label": "Precio medio"
+            }
           ],
           "tips": [
             "Reserva con antelación, especialmente fines de semana",
@@ -101,9 +119,18 @@
           ],
           "photos": [],
           "dishes": [
-            { "name": "Salmorejo cordobés", "description": "Con jamón ibérico y huevo duro" },
-            { "name": "Flamenquín", "description": "Rulo de jamón y lomo empanado" },
-            { "name": "Rabo de toro", "description": "Guiso tradicional estofado" }
+            {
+              "name": "Salmorejo cordobés",
+              "description": "Con jamón ibérico y huevo duro"
+            },
+            {
+              "name": "Flamenquín",
+              "description": "Rulo de jamón y lomo empanado"
+            },
+            {
+              "name": "Rabo de toro",
+              "description": "Guiso tradicional estofado"
+            }
           ],
           "website": "https://tabernalaviuda.es",
           "bookingUrl": "https://www.thefork.es/restaurante/taberna-la-viuda",

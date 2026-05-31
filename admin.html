@@ -390,7 +390,8 @@ function editStop(idx){
     '</div>' + // end media tab
 
     '<div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem;">' +
-    '<button class="btn btn-gold" onclick="saveStop()">✓ Aplicar cambios</button>' +
+    '<button class="btn btn-gold" onclick="saveStop()" title="Guarda los cambios en memoria. Después pulsa '💾 Guardar' en la barra superior para escribir en GitHub.">✓ Aplicar cambios</button>' +
+    '<div style="font-size:0.68rem;color:var(--parch);opacity:0.5;font-style:italic;margin-top:0.4rem;">Aplica los cambios y luego pulsa 💾 Guardar en la barra superior para guardar definitivamente en GitHub.</div>' +
     '<button class="btn btn-danger btn-sm" onclick="delStop('+idx+')">🗑 Eliminar</button>' +
     '</div></div>';
 
@@ -411,24 +412,7 @@ function closeEditor(){editIdx=null;document.getElementById('stop-editor').inner
 function saveStop(){
   if(editIdx===null)return;
   var s=activeDay.stops[editIdx];
-  s.name=v('se-name');s.subtitle=v('se-sub');s.type=v('se-type');
-  s.time=v('se-time');s.duration=v('se-dur');s.address=v('se-addr');
-  s.description=v('se-desc');s.history=v('se-hist');
-  s.tips=(v('se-tips')||'').split('\n').map(function(t){return t.trim();}).filter(Boolean);
-  s.website=v('se-web');s.videoUrl=v('se-video')||'';
-  var lat=parseFloat(v('se-lat'));var lng=parseFloat(v('se-lng'));
-  if(!isNaN(lat))s.lat=lat;if(!isNaN(lng))s.lng=lng;
-  s.color=(TYPES.find(function(t){return t.id===s.type;})||{color:s.color}).color||s.color;
-  s.facts=[0,1,2].map(function(fi){var vv=v('fv'+fi),ll=v('fl'+fi);return(vv||ll)?{value:vv,label:ll}:null;}).filter(Boolean);
-  // Audio sections
-  s.audioSections=(s.audioSections||[]).map(function(sec,si){
-    return {id:sec.id,title:v('sec-t-'+si)||sec.title,text:v('sec-x-'+si)||sec.text,mapImage:v('sec-m-'+si)||''};
-  });
-  // Restaurant fields
-  if(s.type==='restaurant'){
-    s.phone=v('se-phone')||'';s.priceRange=v('se-price')||'';s.bookingUrl=v('se-book')||'';
-    s.dishes=(s.dishes||[]).map(function(d,di){return{name:v('dn-'+di)||d.name,description:v('dd-'+di)||d.description};});
-  }
+  _readStopFields(s);
   markDirty();
   document.getElementById('stops-list').innerHTML=renderStops();
   initDrag();
@@ -436,6 +420,43 @@ function saveStop(){
 }
 
 function v(id){var el=document.getElementById(id);return el?el.value:'';}
+
+// Read all currently-visible stop editor fields into stop object (without re-rendering)
+function _readStopFields(s){
+  if(editIdx===null||!s)return;
+  if(v('se-name'))s.name=v('se-name');
+  if(v('se-sub')!==undefined)s.subtitle=v('se-sub');
+  if(v('se-type'))s.type=v('se-type');
+  if(v('se-time')!==undefined)s.time=v('se-time');
+  if(v('se-dur')!==undefined)s.duration=v('se-dur');
+  if(v('se-addr')!==undefined)s.address=v('se-addr');
+  if(v('se-desc')!==undefined)s.description=v('se-desc');
+  if(v('se-hist')!==undefined)s.history=v('se-hist');
+  if(v('se-tips')!==undefined)s.tips=(v('se-tips')||'').split('\n').map(function(t){return t.trim();}).filter(Boolean);
+  if(v('se-web')!==undefined)s.website=v('se-web');
+  // Video — always read even if tab is hidden (input still in DOM)
+  var vidEl=document.getElementById('se-video');
+  if(vidEl)s.videoUrl=vidEl.value||'';
+  var lat=parseFloat(v('se-lat'));var lng=parseFloat(v('se-lng'));
+  if(!isNaN(lat))s.lat=lat;if(!isNaN(lng))s.lng=lng;
+  s.color=(TYPES.find(function(t){return t.id===s.type;})||{color:s.color}).color||s.color;
+  s.facts=[0,1,2].map(function(fi){var vv=v('fv'+fi),ll=v('fl'+fi);return(vv||ll)?{value:vv,label:ll}:null;}).filter(Boolean);
+  // Audio sections
+  s.audioSections=(s.audioSections||[]).map(function(sec,si){
+    var tt=v('sec-t-'+si);var tx=v('sec-x-'+si);var tm=v('sec-m-'+si);
+    return {id:sec.id,title:tt!==''?tt:sec.title,text:tx!==''?tx:sec.text,mapImage:tm!==''?tm:(sec.mapImage||'')};
+  });
+  // Restaurant
+  if(s.type==='restaurant'){
+    var ph=document.getElementById('se-phone');if(ph)s.phone=ph.value||'';
+    var pr=document.getElementById('se-price');if(pr)s.priceRange=pr.value||'';
+    var bk=document.getElementById('se-book');if(bk)s.bookingUrl=bk.value||'';
+    s.dishes=(s.dishes||[]).map(function(d,di){
+      var dn=v('dn-'+di);var dd=v('dd-'+di);
+      return{name:dn!==''?dn:d.name,description:dd!==''?dd:d.description};
+    });
+  }
+}
 
 function delStop(idx){if(!confirm('¿Eliminar parada?'))return;activeDay.stops.splice(idx,1);markDirty();closeEditor();document.getElementById('stops-list').innerHTML=renderStops();initDrag();}
 
@@ -454,7 +475,13 @@ function addDish(){if(editIdx===null)return;var s=activeDay.stops[editIdx];if(!s
 function delDish(di){if(editIdx===null)return;activeDay.stops[editIdx].dishes.splice(di,1);editStop(editIdx);switchTab('rest');}
 
 // Photos
-function removePhoto(pi){if(editIdx===null)return;activeDay.stops[editIdx].photos.splice(pi,1);markDirty();editStop(editIdx);switchTab('media');}
+function removePhoto(pi){
+  if(editIdx===null)return;
+  var s=activeDay.stops[editIdx];
+  _readStopFields(s);  // preserve all current field values
+  s.photos.splice(pi,1);
+  markDirty();editStop(editIdx);switchTab('media');
+}
 
 function doUpload(){
   document.getElementById('fup').onchange=function(e){
@@ -512,6 +539,8 @@ function toggleWiki(wi){
   var pos=s.photos.indexOf(url);
   if(pos>=0)s.photos.splice(pos,1);else s.photos.push(url);
   markDirty();renderWikiGrid(s.photos);
+  // Also read all current DOM fields so nothing is lost
+  _readStopFields(s);
 }
 
 // ── DRAG & DROP ───────────────────────────────────────────────────────────────
@@ -534,6 +563,11 @@ function initDrag(){
 
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 async function saveTour(){
+  // Auto-apply any open stop editor before saving
+  if(editIdx!==null) saveStop();
+  // Auto-apply meta fields if visible
+  if(document.getElementById('m-title')) updateMeta();
+
   var btn=document.getElementById('save-btn');
   btn.disabled=true;btn.textContent='⏳ Guardando…';
   try{

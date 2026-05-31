@@ -97,7 +97,7 @@ exports.handler = async function (event) {
       }
 
       await ghRequest("PUT", "/repos/" + REPO + "/contents/" + newPath, payload);
-      return json(200, { ok: true, key, path: newPath, bytes: buf.length });
+      return json(200, { ok: true, key, path: newPath, repo: REPO, bytes: buf.length });
 
     } catch (err) {
       return json(500, { error: err.message });

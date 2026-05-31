@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-05-31T20:38:49.545Z"
+    "updatedAt": "2025-01-01T00:00:00Z"
   },
   "days": [
     {
@@ -49,7 +49,7 @@
               "mapImage": ""
             }
           ],
-          "videoUrl": "https://youtu.be/FQvrONIgQjY?is=1DZqetKwoSvxZdJ8",
+          "videoUrl": "",
           "facts": [
             {
               "value": "784",
@@ -68,12 +68,7 @@
             "Compra la entrada online — las colas pueden ser de más de una hora",
             "Las entradas de 8:30 a 9:30h son gratuitas para el culto"
           ],
-          "photos": [
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259692516.jpg",
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259906413.jpg",
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259916179.jpg",
-            "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/s-1780259925724.jpg"
-          ],
+          "photos": [],
           "dishes": null,
           "website": "https://mezquita-catedraldecordoba.es",
           "bookingUrl": "",

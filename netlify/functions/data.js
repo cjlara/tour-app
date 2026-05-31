@@ -1,13 +1,155 @@
-// data.js — serves tour.json
-// Reads from GitHub (always fresh) with fallback to static file
+// data.js — serves tour.json fresh from GitHub (no static cache)
 const https = require("https");
-const fs    = require("fs");
-const path  = require("path");
+
+// Default tour data embedded (used only if GitHub fails AND no static file)
+const DEFAULT_TOUR = {
+  "meta": {
+    "title": "Córdoba",
+    "subtitle": "La Ciudad Califal",
+    "description": "Donde tres civilizaciones se fundieron para crear uno de los centros culturales más brillantes de la historia.",
+    "heroImage": "",
+    "videoUrl": "",
+    "version": "3.1",
+    "updatedAt": "2025-01-01T00:00:00Z"
+  },
+  "days": [
+    {
+      "id": "day-1",
+      "title": "Día 1 · El Corazón Medieval",
+      "description": "El centro histórico declarado Patrimonio de la Humanidad",
+      "stops": [
+        {
+          "id": "stop-mezquita",
+          "order": 1,
+          "time": "09:00",
+          "duration": "90 min",
+          "type": "monument",
+          "color": "#C9A84C",
+          "name": "Mezquita-Catedral",
+          "location": "Córdoba, España",
+          "lat": 37.8789,
+          "lng": -4.7794,
+          "address": "Calle Cardenal Herrero, 1, 14003 Córdoba",
+          "subtitle": "El bosque de columnas donde el Islam y el Cristianismo coexisten",
+          "description": "La Mezquita-Catedral de Córdoba es una de las obras maestras de la arquitectura mundial. Sobre una antigua basílica visigoda, el califa Abd al-Rahman I ordenó en el año 784 la construcción de la gran mezquita.",
+          "history": "En 1236, Fernando III reconquistó Córdoba y consagró la mezquita como catedral. Los reyes castellanos construyeron el coro y la capilla mayor en su interior en el siglo XVI.",
+          "audioSections": [
+            {
+              "id": "as-1",
+              "title": "El acceso: Patio de los Naranjos",
+              "text": "Antes de entrar, detente en el Patio de los Naranjos. Este espacio abierto era donde los fieles musulmanes se purificaban antes de la oración. Las fuentes que ves son originales del siglo X.",
+              "mapImage": ""
+            },
+            {
+              "id": "as-2",
+              "title": "El bosque de columnas",
+              "text": "Imagina el año 786. Abd al-Rahman el Primero levanta este bosque de columnas. Cada columna cuenta una historia diferente: algunas vienen de templos romanos, otras de palacios visigodos.",
+              "mapImage": ""
+            },
+            {
+              "id": "as-3",
+              "title": "El Mihrab",
+              "text": "El mihrab es el corazón espiritual de la mezquita. Esta hornacina señala la dirección de La Meca. Observa los mosaicos de oro y el arco de herradura lobulado.",
+              "mapImage": ""
+            }
+          ],
+          "videoUrl": "",
+          "facts": [
+            {
+              "value": "784",
+              "label": "Año fundación"
+            },
+            {
+              "value": "856",
+              "label": "Columnas"
+            },
+            {
+              "value": "23.400m²",
+              "label": "Superficie"
+            }
+          ],
+          "tips": [
+            "Compra la entrada online — las colas pueden ser de más de una hora",
+            "Las entradas de 8:30 a 9:30h son gratuitas para el culto"
+          ],
+          "photos": [],
+          "dishes": null,
+          "website": "https://mezquita-catedraldecordoba.es",
+          "bookingUrl": "",
+          "phone": "",
+          "priceRange": ""
+        },
+        {
+          "id": "stop-almuerzo",
+          "order": 2,
+          "time": "13:00",
+          "duration": "90 min",
+          "type": "restaurant",
+          "color": "#E84040",
+          "name": "Taberna La Viuda",
+          "location": "Córdoba, España",
+          "lat": 37.8753,
+          "lng": -4.7851,
+          "address": "Calle San Basilio 52, 14004 Córdoba",
+          "subtitle": "Cocina cordobesa auténtica junto al Alcázar",
+          "description": "Una de las tabernas más auténticas de Córdoba. Ambiente de mesas de madera, azulejos en las paredes, y una cocina que huele a guisos de toda la vida.",
+          "history": "La gastronomía cordobesa es heredera directa de Al-Ándalus. El salmorejo tiene sus raíces en la mazamorra árabe.",
+          "audioSections": [
+            {
+              "id": "as-r1",
+              "title": "Los platos imprescindibles",
+              "text": "El salmorejo cordobés es la estrella. Más espeso que el gazpacho, elaborado con tomate, pan, ajo y aceite de oliva. Se corona con jamón ibérico y huevo duro.",
+              "mapImage": ""
+            }
+          ],
+          "videoUrl": "",
+          "facts": [
+            {
+              "value": "4.6★",
+              "label": "Valoración"
+            },
+            {
+              "value": "13-16h",
+              "label": "Horario"
+            },
+            {
+              "value": "€€",
+              "label": "Precio medio"
+            }
+          ],
+          "tips": [
+            "Reserva con antelación, especialmente fines de semana",
+            "Pide la cerveza artesana de la casa"
+          ],
+          "photos": [],
+          "dishes": [
+            {
+              "name": "Salmorejo cordobés",
+              "description": "Con jamón ibérico y huevo duro"
+            },
+            {
+              "name": "Flamenquín",
+              "description": "Rulo de jamón y lomo empanado"
+            },
+            {
+              "name": "Rabo de toro",
+              "description": "Guiso tradicional estofado"
+            }
+          ],
+          "website": "https://tabernalaviuda.es",
+          "bookingUrl": "https://www.thefork.es/restaurante/taberna-la-viuda",
+          "phone": "+34 957 29 69 05",
+          "priceRange": "€€"
+        }
+      ]
+    }
+  ]
+};
 
 exports.handler = async function (event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
+    "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store, no-cache, must-revalidate",
   };
 
@@ -15,53 +157,49 @@ exports.handler = async function (event) {
   const GTOKEN = process.env.GITHUB_TOKEN  || "";
   const BRANCH = process.env.GITHUB_BRANCH || "main";
 
-  // Log env for debugging (remove after confirming)
-  console.log("data.js GITHUB_REPO:", REPO || "(not set)");
+  console.log("[data.js] REPO=" + REPO + " hasToken=" + !!GTOKEN);
 
-  // Try GitHub first if configured
-  if (REPO && GTOKEN) {
-    try {
-      const result = await ghGet(
-        "https://api.github.com/repos/" + REPO + "/contents/data/tour.json?ref=" + BRANCH,
-        GTOKEN
-      );
-      const decoded = Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
-      // Validate it's JSON
-      JSON.parse(decoded);
-      console.log("data.js: served from GitHub repo", REPO);
-      return { statusCode: 200, headers, body: decoded };
-    } catch (err) {
-      console.error("data.js GitHub error:", err.message);
-      // Fall through to static file
-    }
+  if (!REPO || !GTOKEN) {
+    console.log("[data.js] No GitHub config, serving default");
+    return { statusCode: 200, headers, body: JSON.stringify(DEFAULT_TOUR) };
   }
 
-  // Fallback: static file bundled at deploy time
   try {
-    const staticPath = path.join(__dirname, "..", "..", "data", "tour.json");
-    const local = fs.readFileSync(staticPath, "utf8");
-    console.log("data.js: served from static file");
-    return { statusCode: 200, headers, body: local };
-  } catch (e) {
-    console.error("data.js static fallback failed:", e.message);
+    const result = await ghGet(
+      "/repos/" + REPO + "/contents/data/tour.json?ref=" + BRANCH,
+      GTOKEN
+    );
+
+    if (!result.content) {
+      throw new Error("No content in GitHub response");
+    }
+
+    const decoded = Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
+    const parsed = JSON.parse(decoded); // validate it's valid JSON
+    console.log("[data.js] Served from GitHub, days=" + (parsed.days || []).length);
+    return { statusCode: 200, headers, body: decoded };
+
+  } catch (err) {
+    console.error("[data.js] GitHub error:", err.message);
+    // Return error info + default so client knows what happened
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        error: "tour.json not found. GITHUB_REPO=" + (REPO||"not set"),
-        meta: { title: "Tour", subtitle: "", description: "", heroImage: "", videoUrl: "", version: "3.1" },
-        days: []
+        ...DEFAULT_TOUR,
+        _source: "fallback",
+        _error: err.message,
+        _repo: REPO
       })
     };
   }
 };
 
-function ghGet(url, token) {
+function ghGet(path, token) {
   return new Promise((resolve, reject) => {
-    const u = new URL(url);
     const req = https.request({
-      hostname: u.hostname,
-      path: u.pathname + u.search,
+      hostname: "api.github.com",
+      path: path,
       method: "GET",
       headers: {
         "User-Agent": "tour-app/1.0",
@@ -71,21 +209,21 @@ function ghGet(url, token) {
       },
     }, (res) => {
       let d = "";
-      res.on("data", c => d += c);
-      res.on("end", () => {
+      res.on("data", function(c) { d += c; });
+      res.on("end", function() {
         try {
           const parsed = JSON.parse(d);
           if (res.statusCode >= 400) {
-            return reject(new Error("GitHub " + res.statusCode + ": " + (parsed.message || d.slice(0,100))));
+            return reject(new Error("GitHub HTTP " + res.statusCode + ": " + (parsed.message || "unknown")));
           }
           resolve(parsed);
         } catch(e) {
-          reject(new Error("JSON parse error: " + d.slice(0, 100)));
+          reject(new Error("Parse error: " + d.slice(0, 100)));
         }
       });
     });
     req.on("error", reject);
-    req.setTimeout(10000, () => { req.destroy(); reject(new Error("Timeout")); });
+    req.setTimeout(10000, function() { req.destroy(); reject(new Error("Timeout")); });
     req.end();
   });
 }

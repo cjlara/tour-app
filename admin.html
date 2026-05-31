@@ -430,50 +430,79 @@ function switchTab(tab){
 function closeEditor(){editIdx=null;document.getElementById('stop-editor').innerHTML='';}
 
 function saveStop(){
-  if(editIdx===null)return;
+  if(editIdx===null){toast('Abre un editor primero','err');return;}
   var s=activeDay.stops[editIdx];
   _readStopFields(s);
   markDirty();
   document.getElementById('stops-list').innerHTML=renderStops();
   initDrag();
-  toast('✓ Cambios aplicados','ok');
+  var info='✓ '+s.name+' — fotos:'+s.photos.length+(s.videoUrl?' + vídeo':'');
+  toast(info,'ok');
 }
 
 function v(id){var el=document.getElementById(id);return el?el.value:'';}
 
-// Read all currently-visible stop editor fields into stop object (without re-rendering)
+// Read ALL stop editor fields into stop object - works regardless of tab visibility
 function _readStopFields(s){
-  if(editIdx===null||!s)return;
-  if(v('se-name'))s.name=v('se-name');
-  if(v('se-sub')!==undefined)s.subtitle=v('se-sub');
-  if(v('se-type'))s.type=v('se-type');
-  if(v('se-time')!==undefined)s.time=v('se-time');
-  if(v('se-dur')!==undefined)s.duration=v('se-dur');
-  if(v('se-addr')!==undefined)s.address=v('se-addr');
-  if(v('se-desc')!==undefined)s.description=v('se-desc');
-  if(v('se-hist')!==undefined)s.history=v('se-hist');
-  if(v('se-tips')!==undefined)s.tips=(v('se-tips')||'').split('\n').map(function(t){return t.trim();}).filter(Boolean);
-  if(v('se-web')!==undefined)s.website=v('se-web');
-  // Video — always read even if tab is hidden (input still in DOM)
-  var vidEl=document.getElementById('se-video');
-  if(vidEl)s.videoUrl=vidEl.value||'';
-  var lat=parseFloat(v('se-lat'));var lng=parseFloat(v('se-lng'));
-  if(!isNaN(lat))s.lat=lat;if(!isNaN(lng))s.lng=lng;
-  s.color=(TYPES.find(function(t){return t.id===s.type;})||{color:s.color}).color||s.color;
-  s.facts=[0,1,2].map(function(fi){var vv=v('fv'+fi),ll=v('fl'+fi);return(vv||ll)?{value:vv,label:ll}:null;}).filter(Boolean);
-  // Audio sections
-  s.audioSections=(s.audioSections||[]).map(function(sec,si){
-    var tt=v('sec-t-'+si);var tx=v('sec-x-'+si);var tm=v('sec-m-'+si);
-    return {id:sec.id,title:tt!==''?tt:sec.title,text:tx!==''?tx:sec.text,mapImage:tm!==''?tm:(sec.mapImage||'')};
+  if(!s)return;
+  // Helper: read field value only if element exists
+  function rd(id){var el=document.getElementById(id);return el?el.value:null;}
+  
+  var n=rd('se-name');    if(n!==null&&n!=='')s.name=n;
+  var sub=rd('se-sub');   if(sub!==null)s.subtitle=sub;
+  var typ=rd('se-type');  if(typ!==null&&typ!=='')s.type=typ;
+  var tm=rd('se-time');   if(tm!==null)s.time=tm;
+  var dur=rd('se-dur');   if(dur!==null)s.duration=dur;
+  var adr=rd('se-addr');  if(adr!==null)s.address=adr;
+  var dsc=rd('se-desc');  if(dsc!==null)s.description=dsc;
+  var hst=rd('se-hist');  if(hst!==null)s.history=hst;
+  var tps=rd('se-tips');  if(tps!==null)s.tips=tps.split('\n').map(function(t){return t.trim();}).filter(Boolean);
+  var web=rd('se-web');   if(web!==null)s.website=web;
+  var vid=rd('se-video'); if(vid!==null)s.videoUrl=vid;
+  var lat=parseFloat(rd('se-lat'));
+  var lng=parseFloat(rd('se-lng'));
+  if(!isNaN(lat))s.lat=lat;
+  if(!isNaN(lng))s.lng=lng;
+  
+  if(s.type){
+    var found=TYPES.find(function(t){return t.id===s.type;});
+    if(found)s.color=found.color;
+  }
+  
+  // Facts
+  var facts=[];
+  for(var fi=0;fi<3;fi++){
+    var fv=rd('fv'+fi), fl=rd('fl'+fi);
+    if(fv!==null||fl!==null){
+      var fvv=fv||'', fll=fl||'';
+      if(fvv||fll)facts.push({value:fvv,label:fll});
+    }
+  }
+  if(facts.length>0)s.facts=facts;
+  
+  // Audio sections — read if fields exist
+  var secs=s.audioSections||[];
+  var newSecs=secs.map(function(sec,si){
+    var tt=rd('sec-t-'+si), tx=rd('sec-x-'+si), mp=rd('sec-m-'+si);
+    return {
+      id:sec.id||('as-'+si),
+      title:tt!==null?tt:sec.title,
+      text:tx!==null?tx:sec.text,
+      mapImage:mp!==null?mp:(sec.mapImage||'')
+    };
   });
-  // Restaurant
-  if(s.type==='restaurant'){
-    var ph=document.getElementById('se-phone');if(ph)s.phone=ph.value||'';
-    var pr=document.getElementById('se-price');if(pr)s.priceRange=pr.value||'';
-    var bk=document.getElementById('se-book');if(bk)s.bookingUrl=bk.value||'';
-    s.dishes=(s.dishes||[]).map(function(d,di){
-      var dn=v('dn-'+di);var dd=v('dd-'+di);
-      return{name:dn!==''?dn:d.name,description:dd!==''?dd:d.description};
+  if(newSecs.length>0)s.audioSections=newSecs;
+  
+  // Restaurant fields
+  var ph=rd('se-phone');  if(ph!==null)s.phone=ph;
+  var pr=rd('se-price');  if(pr!==null)s.priceRange=pr;
+  var bk=rd('se-book');   if(bk!==null)s.bookingUrl=bk;
+  
+  // Dishes
+  if(s.dishes&&s.dishes.length>0){
+    s.dishes=s.dishes.map(function(d,di){
+      var dn=rd('dn-'+di), dd=rd('dd-'+di);
+      return{name:dn!==null?dn:d.name, description:dd!==null?dd:d.description};
     });
   }
 }
@@ -513,12 +542,18 @@ function doUpload(){
       var b64=parts[1];
       var key='s-'+Date.now();
       toast('Subiendo foto…','ok');
+      var REPO = (window.GITHUB_REPO || '');
       fetch('/.netlify/functions/upload',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},
-        body:JSON.stringify({key,data:b64,mime})})
+        body:JSON.stringify({key:key,data:b64,mime:mime})})
         .then(function(r){return r.json();}).then(function(d){
-          if(d.error){toast('Error: '+d.error,'err');return;}
-          activeDay.stops[editIdx].photos.push('/.netlify/functions/photo?key='+key);
-          markDirty();editStop(editIdx);switchTab('media');toast('✓ Foto subida','ok');
+          if(d.error){toast('Error subiendo: '+d.error,'err');return;}
+          // Use GitHub raw URL so image loads directly without needing a function
+          var rawUrl = d.path
+            ? 'https://raw.githubusercontent.com/'+d.repo+'/main/'+d.path
+            : 'data:'+mime+';base64,'+b64;  // fallback: embed as data URL
+          activeDay.stops[editIdx].photos.push(rawUrl);
+          markDirty();_readStopFields(activeDay.stops[editIdx]);
+          editStop(editIdx);switchTab('media');toast('✓ Foto subida','ok');
         }).catch(function(e){toast('Error: '+e.message,'err');});
     };r.readAsDataURL(file);
   };
@@ -584,7 +619,9 @@ function initDrag(){
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 async function saveTour(){
   // Auto-apply any open stop editor before saving
-  if(editIdx!==null) saveStop();
+  if(editIdx!==null && activeDay && activeDay.stops && activeDay.stops[editIdx]){
+    _readStopFields(activeDay.stops[editIdx]);
+  }
   // Auto-apply meta fields if visible
   if(document.getElementById('m-title')) updateMeta();
 

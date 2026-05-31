@@ -165,19 +165,12 @@ exports.handler = async function (event) {
   }
 
   try {
-    const result = await ghGet(
-      "/repos/" + REPO + "/contents/data/tour.json?ref=" + BRANCH,
-      GTOKEN
-    );
-
-    if (!result.content) {
-      throw new Error("No content in GitHub response");
-    }
-
-    const decoded = Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
-    const parsed = JSON.parse(decoded); // validate it's valid JSON
-    console.log("[data.js] Served from GitHub, days=" + (parsed.days || []).length);
-    return { statusCode: 200, headers, body: decoded };
+    // Try raw.githubusercontent.com first - updates instantly, no API rate limits
+    const rawUrl = "https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/data/tour.json?_t=" + Date.now();
+    const rawResult = await fetchRaw(rawUrl);
+    const parsed = JSON.parse(rawResult);
+    console.log("[data.js] Served from raw GitHub, days=" + (parsed.days || []).length);
+    return { statusCode: 200, headers, body: rawResult };
 
   } catch (err) {
     console.error("[data.js] GitHub error:", err.message);
@@ -195,6 +188,32 @@ exports.handler = async function (event) {
   }
 };
 
+function fetchRaw(url) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      method: "GET",
+      headers: {
+        "User-Agent": "tour-app/1.0",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    }, (res) => {
+      let d = "";
+      res.on("data", function(c) { d += c; });
+      res.on("end", function() {
+        if (res.statusCode >= 400) return reject(new Error("HTTP " + res.statusCode));
+        resolve(d);
+      });
+    });
+    req.on("error", reject);
+    req.setTimeout(10000, function() { req.destroy(); reject(new Error("Timeout")); });
+    req.end();
+  });
+}
+
 function ghGet(path, token) {
   return new Promise((resolve, reject) => {
     const req = https.request({
@@ -206,6 +225,8 @@ function ghGet(path, token) {
         "Authorization": "Bearer " + token,
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
       },
     }, (res) => {
       let d = "";

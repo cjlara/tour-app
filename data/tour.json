@@ -6,7 +6,7 @@
     "heroImage": "",
     "videoUrl": "",
     "version": "3.1",
-    "updatedAt": "2026-06-01T10:03:17.272Z"
+    "updatedAt": "2026-06-01T10:04:25.734Z"
   },
   "days": [
     {
@@ -34,7 +34,7 @@
               "id": "as-1",
               "title": "El acceso: Patio de los Naranjos",
               "text": "Antes de entrar, detente en el Patio de los Naranjos. Este espacio abierto era donde los fieles musulmanes se purificaban antes de la oración. Las fuentes que ves son originales del siglo X.",
-              "mapImage": ""
+              "mapImage": "https://raw.githubusercontent.com/cjlara/tour-app/main/photos/sec-1780308249452.png"
             },
             {
               "id": "as-2",
@@ -49,7 +49,7 @@
               "mapImage": ""
             }
           ],
-          "videoUrl": "https://youtu.be/FQvrONIgQjY?si=jyTqmKV4c_5w8ilb",
+          "videoUrl": "",
           "facts": [
             {
               "value": "784",

@@ -8,96 +8,86 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --gold:#C9A84C;--gold2:#E8C97A;--ivory:#F5EFE0;--parch:#EDE3C8;
-  --terra:#B5541B;--ink:#0D1117;--card:#131920;--smoke:#1E2535;
-  --border:rgba(201,168,76,0.18);--err:#e84040;--rest:#E84040;
+  --gold:#C9A84C;--ivory:#F5EFE0;--parch:#EDE3C8;--terra:#B5541B;
+  --ink:#0D1117;--card:#131920;--border:rgba(201,168,76,0.18);--err:#e84040;
   --serif:'Cormorant Garamond',Georgia,serif;--display:'Playfair Display',Georgia,serif;
 }
-html,body{height:100%;background:var(--ink);color:var(--ivory);font-family:var(--serif);font-size:16px;overflow:hidden;}
-button,input,select,textarea{font-family:var(--serif);}
+html,body{height:100%;background:var(--ink);color:var(--ivory);font-family:var(--serif);}
+button,input,select,textarea{font-family:var(--serif);box-sizing:border-box;}
 button{cursor:pointer;}
-a{color:var(--gold);text-decoration:none;}
-.topbar{display:flex;align-items:center;gap:1rem;padding:0.9rem 1.5rem;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;}
-.topbar-title{font-family:var(--display);font-size:1.1rem;color:var(--gold);flex:1;}
-.topbar-title span{color:var(--ivory);font-style:italic;font-size:0.85rem;}
-.main{display:flex;flex:1;overflow:hidden;min-height:0;}
-.sidebar{width:240px;flex-shrink:0;border-right:1px solid var(--border);background:var(--card);display:flex;flex-direction:column;overflow-y:auto;}
-.content{flex:1;overflow-y:auto;padding:1.4rem;}
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;}
-.login-box{background:var(--card);border:1px solid var(--border);padding:2.5rem;width:340px;text-align:center;}
-.login-title{font-family:var(--display);font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem;}
-.login-sub{font-style:italic;color:var(--parch);opacity:0.6;margin-bottom:1.5rem;font-size:0.88rem;}
-.inp{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--ivory);font-family:var(--serif);font-size:0.95rem;padding:0.65rem 0.9rem;outline:none;transition:border .2s;}
+.topbar{display:flex;align-items:center;gap:0.8rem;padding:0.8rem 1.2rem;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+.brand{font-family:var(--display);font-size:1rem;color:var(--gold);flex:1;}
+.main{display:flex;height:calc(100vh - 50px);}
+.sidebar{width:220px;flex-shrink:0;border-right:1px solid var(--border);background:var(--card);overflow-y:auto;display:flex;flex-direction:column;}
+.content{flex:1;overflow-y:auto;padding:1.2rem;}
+.sidebar-sec{padding:0.6rem 1rem;font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.55;border-top:1px solid var(--border);}
+.sidebar-sec:first-child{border-top:none;}
+.day-item{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 1rem;cursor:pointer;border-left:2px solid transparent;}
+.day-item:hover{background:rgba(255,255,255,0.04);}
+.day-item.active{background:rgba(201,168,76,0.07);border-left-color:var(--gold);}
+.inp{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--ivory);font-family:var(--serif);font-size:0.93rem;padding:0.6rem 0.85rem;outline:none;}
 .inp:focus{border-color:var(--gold);}
-textarea.inp{resize:vertical;min-height:72px;line-height:1.6;}
+textarea.inp{resize:vertical;min-height:70px;line-height:1.6;}
 select.inp option{background:#131920;}
-.btn{display:inline-flex;align-items:center;gap:0.4rem;background:transparent;border:1px solid rgba(201,168,76,0.35);color:var(--parch);font-family:var(--serif);font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1rem;transition:all .2s;}
+.btn{display:inline-flex;align-items:center;gap:0.35rem;background:transparent;border:1px solid rgba(201,168,76,0.35);color:var(--parch);font-family:var(--serif);font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.45rem 0.9rem;transition:all .2s;}
 .btn:hover{border-color:var(--gold);color:var(--gold);}
 .btn-gold{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:600;}
-.btn-gold:hover{background:var(--gold2);}
-.btn-sm{font-size:0.7rem;padding:0.28rem 0.65rem;}
+.btn-gold:hover{background:#E8C97A;}
+.btn-sm{font-size:0.68rem;padding:0.25rem 0.6rem;}
 .btn-danger{border-color:rgba(232,64,64,0.3);color:rgba(232,64,64,0.65);}
 .btn-danger:hover{border-color:var(--err);color:var(--err);}
 .btn-icon{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;}
 .btn:disabled{opacity:0.4;cursor:not-allowed;}
-.sidebar-sec{padding:0.7rem 1rem;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.55;border-top:1px solid var(--border);}
-.sidebar-sec:first-child{border-top:none;}
-.day-item{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1rem;cursor:pointer;transition:background .15s;border-left:2px solid transparent;}
-.day-item:hover{background:rgba(255,255,255,0.04);}
-.day-item.active{background:rgba(201,168,76,0.07);border-left-color:var(--gold);}
-.day-num{width:20px;height:20px;border-radius:50%;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-size:0.68rem;color:var(--gold);flex-shrink:0;}
-.stop-row{background:var(--card);border:1px solid var(--border);padding:0.8rem 0.9rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.7rem;transition:border .2s;}
-.stop-row:hover{border-color:rgba(201,168,76,0.35);}
+.panel{background:var(--card);border:1px solid var(--border);padding:1.1rem;margin-bottom:0.9rem;}
+.panel-title{font-family:var(--display);font-size:0.9rem;color:var(--gold);margin-bottom:0.9rem;padding-bottom:0.45rem;border-bottom:1px solid var(--border);}
+.field{margin-bottom:0.75rem;}
+.field label{display:block;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.65;margin-bottom:0.3rem;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;}
+.stop-row{background:var(--card);border:1px solid var(--border);padding:0.75rem 0.85rem;margin-bottom:0.45rem;display:flex;align-items:center;gap:0.65rem;}
 .stop-row.dragover{border-color:var(--gold);background:rgba(201,168,76,0.06);}
-.drag-handle{cursor:grab;color:rgba(201,168,76,0.25);font-size:1rem;flex-shrink:0;}
-.panel{background:var(--card);border:1px solid var(--border);padding:1.3rem;margin-bottom:1rem;}
-.panel-title{font-family:var(--display);font-size:0.95rem;color:var(--gold);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
-.field{margin-bottom:0.85rem;}
-.field label{display:block;font-size:0.63rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.65;margin-bottom:0.35rem;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
-.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.7rem;}
-.wizard{background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.22);padding:1.2rem;margin-bottom:1rem;}
-.wizard-title{font-family:var(--display);font-size:0.95rem;color:var(--gold);margin-bottom:0.9rem;}
-.spinner{width:18px;height:18px;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+.drag-handle{cursor:grab;color:rgba(201,168,76,0.25);font-size:0.95rem;flex-shrink:0;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--parch);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;padding:0.6rem 1rem;cursor:pointer;opacity:0.6;}
+.tab.active{border-bottom-color:var(--gold);color:var(--gold);opacity:1;}
+.wizard{background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);padding:1.1rem;margin-bottom:0.9rem;}
+.spinner{width:17px;height:17px;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.2rem;}
-.tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--parch);font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.65rem 1.1rem;cursor:pointer;opacity:0.6;transition:all .2s;}
-.tab-btn.active{border-bottom-color:var(--gold);color:var(--gold);opacity:1;}
-.section-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:1rem;margin-bottom:0.7rem;}
-.section-card-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.7rem;}
-#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--card);border:1px solid var(--border);padding:0.65rem 1rem;font-size:0.83rem;z-index:999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px;}
+#toast{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--card);border:1px solid var(--border);padding:0.6rem 0.95rem;font-size:0.82rem;z-index:9999;opacity:0;transform:translateY(6px);transition:all .3s;pointer-events:none;max-width:300px;}
 #toast.show{opacity:1;transform:translateY(0);}
 #toast.ok{border-color:var(--gold);color:var(--gold);}
 #toast.err{border-color:var(--err);color:var(--err);}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.login-box{background:var(--card);border:1px solid var(--border);padding:2.2rem;width:320px;text-align:center;}
 </style>
 </head>
 <body>
 
 <div id="login">
   <div class="login-box">
-    <div class="login-title">Tour CMS</div>
-    <div class="login-sub">Panel de administración</div>
-    <input type="password" class="inp" id="tok" placeholder="Contraseña" style="margin-bottom:0.7rem;" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="doLogin()">Entrar</button>
-    <div id="lerr" style="color:var(--err);font-size:0.8rem;margin-top:0.6rem;display:none;">Contraseña incorrecta</div>
+    <div style="font-family:var(--display);font-size:1.4rem;color:var(--gold);margin-bottom:0.25rem;">Tour CMS</div>
+    <div style="font-style:italic;color:var(--parch);opacity:0.55;margin-bottom:1.3rem;font-size:0.85rem;">Panel de administración</div>
+    <input type="password" class="inp" id="tok" placeholder="Contraseña" style="margin-bottom:0.65rem;" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="doLogin()" id="login-btn">Entrar</button>
+    <div id="lerr" style="color:var(--err);font-size:0.78rem;margin-top:0.55rem;display:none;">Error al cargar</div>
   </div>
 </div>
 
 <div id="cms" style="display:none;flex-direction:column;height:100vh;">
   <div class="topbar">
-    <div class="topbar-title">Tour CMS <span>· Admin</span></div>
-    <a href="/" class="btn btn-sm" onclick="window.open('/?nocache='+Date.now());return false;">← Ver guía</a>
+    <div class="brand">Tour CMS · <span style="font-style:italic;font-size:0.85rem;color:var(--ivory);">Admin</span></div>
+    <a href="/" class="btn btn-sm" onclick="window.open('/?t='+Date.now());return false;">← Ver guía</a>
     <button id="save-btn" class="btn btn-gold btn-sm" onclick="saveTour()" disabled>💾 Guardar</button>
   </div>
   <div class="main">
     <div class="sidebar">
       <div class="sidebar-sec">Destino</div>
-      <div style="padding:0.7rem 1rem;">
+      <div style="padding:0.65rem 1rem;">
         <button class="btn btn-sm" style="width:100%;justify-content:center;" onclick="showMeta()">⚙ Configuración</button>
       </div>
       <div class="sidebar-sec">Días de ruta</div>
       <div id="days-list"></div>
-      <div style="padding:0.7rem 1rem;">
+      <div style="padding:0.65rem 1rem;">
         <button class="btn btn-sm" style="width:100%;justify-content:center;" onclick="addDay()">+ Añadir día</button>
       </div>
     </div>
@@ -109,448 +99,543 @@ select.inp option{background:#131920;}
 <input type="file" id="fup" accept="image/jpeg,image/png,image/webp" style="display:none">
 
 <script>
-var ADMIN_TOKEN='', tour=null, activeDayIdx=null, activeDay=null, editIdx=null, dirty=false, wikiPhotos=[], dragSrc=null;
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var TOKEN = '', tour = null, dayIdx = null, curDay = null, stopIdx = null, dirty = false;
+var wikiPhotos = [], dragSrc = null, curTab = 'info';
 
-var TYPES=[
-  {id:'monument',   label:'Monumento',       icon:'🏛', color:'#C9A84C'},
-  {id:'restaurant', label:'Restaurante',      icon:'🍽', color:'#E84040'},
-  {id:'neighborhood',label:'Barrio/Zona',    icon:'🏘', color:'#7A9E9F'},
-  {id:'museum',     label:'Museo',            icon:'🎨', color:'#6B7FA3'},
-  {id:'viewpoint',  label:'Mirador/Natural',  icon:'🌿', color:'#5A8A5E'},
-  {id:'market',     label:'Mercado',          icon:'🛍', color:'#8B5E3C'},
-  {id:'other',      label:'Otro',             icon:'📍', color:'#9A8A7A'},
+var TYPES = [
+  {id:'monument',   label:'Monumento',      icon:'🏛', color:'#C9A84C'},
+  {id:'restaurant', label:'Restaurante',    icon:'🍽', color:'#E84040'},
+  {id:'neighborhood',label:'Barrio/Zona',   icon:'🏘', color:'#7A9E9F'},
+  {id:'museum',     label:'Museo',          icon:'🎨', color:'#6B7FA3'},
+  {id:'viewpoint',  label:'Mirador',        icon:'🌿', color:'#5A8A5E'},
+  {id:'market',     label:'Mercado',        icon:'🛍', color:'#8B5E3C'},
+  {id:'other',      label:'Otro',           icon:'📍', color:'#9A8A7A'},
 ];
 
-function tmeta(type){return TYPES.find(function(t){return t.id===type;})||TYPES[TYPES.length-1];}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function tmeta(t){
+  for(var i=0;i<TYPES.length;i++){if(TYPES[i].id===t)return TYPES[i];}
+  return TYPES[TYPES.length-1];
+}
+
+function esc(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function rd(id){var el=document.getElementById(id);return el?el.value:null;}
+
+function allStops(){
+  var result=[];
+  var days=tour&&tour.days?tour.days:[];
+  for(var i=0;i<days.length;i++){
+    var stops=days[i].stops||[];
+    for(var j=0;j<stops.length;j++) result.push(stops[j]);
+  }
+  return result;
+}
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 function doLogin(){
-  ADMIN_TOKEN=document.getElementById('tok').value.trim();
-  if(!ADMIN_TOKEN)return;
-  var btn=document.querySelector('.login-box .btn-gold');
-  if(btn){btn.disabled=true;btn.textContent='Cargando…';}
-  loadTour(function(ok){
-    if(btn){btn.disabled=false;btn.textContent='Entrar';}
-    if(ok){
+  TOKEN=document.getElementById('tok').value.trim();
+  if(!TOKEN)return;
+  document.getElementById('login-btn').textContent='Cargando…';
+  document.getElementById('login-btn').disabled=true;
+  fetch('/.netlify/functions/data?t='+Date.now())
+    .then(function(r){return r.ok?r.json():Promise.reject(new Error('HTTP '+r.status));})
+    .then(function(d){
+      tour=d;
+      if(!tour.meta)tour.meta={title:'Mi Tour',subtitle:'',description:'',heroImage:'',videoUrl:''};
+      if(!tour.days)tour.days=[];
       document.getElementById('login').style.display='none';
       document.getElementById('cms').style.display='flex';
-      renderSidebar(); showMeta();
-    } else {
+      renderSidebar();
+      showMeta();
+    })
+    .catch(function(e){
+      document.getElementById('lerr').textContent='Error: '+e.message;
       document.getElementById('lerr').style.display='block';
-      ADMIN_TOKEN='';
-    }
-  });
-}
-
-function loadTour(cb){
-  function makeFreshTour(){
-    return {meta:{title:'Mi Tour',subtitle:'',description:'',heroImage:'',videoUrl:'',version:'3.1',updatedAt:new Date().toISOString()},days:[]};
-  }
-  try{
-    fetch('/.netlify/functions/data?t='+Date.now())
-      .then(function(r){
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        return r.json();
-      })
-      .then(function(d){
-        tour=d;
-        if(!tour.meta)tour.meta=makeFreshTour().meta;
-        if(!tour.days)tour.days=[];
-        if(cb)cb(true);
-      })
-      .catch(function(e){
-        console.log('data function failed, starting fresh:', e.message);
-        tour=makeFreshTour();
-        if(cb)cb(true);
-      });
-  }catch(e){
-    tour=makeFreshTour();
-    if(cb)cb(true);
-  }
+      document.getElementById('login-btn').textContent='Entrar';
+      document.getElementById('login-btn').disabled=false;
+    });
 }
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
 function renderSidebar(){
-  document.getElementById('days-list').innerHTML=(tour.days||[]).map(function(d,i){
-    var active=activeDayIdx===i;
-    return '<div class="day-item'+(active?' active':'')+'" onclick="selectDay('+i+')">' +
-      '<div class="day-num">'+(i+1)+'</div>' +
-      '<div style="flex:1;font-size:0.82rem;color:var(--parch);">'+esc(d.title||'Día '+(i+1))+'</div>' +
-      '<div style="font-size:0.65rem;color:var(--parch);opacity:0.4;">'+(d.stops||[]).length+'</div>' +
+  var html='';
+  var days=tour.days||[];
+  for(var i=0;i<days.length;i++){
+    var d=days[i];
+    var active=dayIdx===i;
+    html+='<div class="day-item'+(active?' active':'')+'" onclick="selectDay('+i+')">'+
+      '<div style="width:19px;height:19px;border-radius:50%;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--gold);flex-shrink:0;">'+(i+1)+'</div>'+
+      '<div style="flex:1;font-size:0.8rem;color:var(--parch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(d.title||'Día '+(i+1))+'</div>'+
+      '<div style="font-size:0.62rem;color:var(--parch);opacity:0.4;">'+((d.stops||[]).length)+'</div>'+
     '</div>';
-  }).join('');
+  }
+  document.getElementById('days-list').innerHTML=html;
 }
 
-function selectDay(idx){activeDayIdx=idx;activeDay=tour.days[idx];editIdx=null;renderSidebar();showDay();}
+function selectDay(i){
+  // Save open editor before switching
+  if(stopIdx!==null) applyStopFields();
+  dayIdx=i; curDay=tour.days[i]; stopIdx=null;
+  renderSidebar(); showDay();
+}
+
 function addDay(){
+  if(stopIdx!==null) applyStopFields();
   var n=(tour.days||[]).length+1;
+  if(!tour.days) tour.days=[];
   tour.days.push({id:'day-'+Date.now(),title:'Día '+n,description:'',stops:[]});
-  markDirty();renderSidebar();selectDay(tour.days.length-1);
+  markDirty(); renderSidebar(); selectDay(tour.days.length-1);
 }
 
 // ── META ──────────────────────────────────────────────────────────────────────
 function showMeta(){
+  stopIdx=null; curDay=null; dayIdx=null; renderSidebar();
   var m=tour.meta||{};
   document.getElementById('content').innerHTML=
-    '<div class="panel"><div class="panel-title">Información del destino</div>' +
-    '<div class="field"><label>Nombre del destino</label><input class="inp" id="m-title" value="'+esc(m.title||'')+'" oninput="updateMeta()"></div>' +
-    '<div class="field"><label>Subtítulo / Tagline</label><input class="inp" id="m-sub" value="'+esc(m.subtitle||'')+'" oninput="updateMeta()"></div>' +
-    '<div class="field"><label>Descripción</label><textarea class="inp" id="m-desc" oninput="updateMeta()">'+esc(m.description||'')+'</textarea></div>' +
-    '<div class="field"><label>URL imagen de portada (hero)</label><input class="inp" id="m-hero" value="'+esc(m.heroImage||'')+'" oninput="updateMeta()" placeholder="https://..."></div>' +
-    '<div class="field"><label>📹 URL vídeo YouTube del destino (opcional)</label><input class="inp" id="m-video" value="'+esc(m.videoUrl||'')+'" oninput="updateMeta()" placeholder="https://www.youtube.com/watch?v=..."></div>' +
+    '<div class="panel"><div class="panel-title">Información del destino</div>'+
+    '<div class="field"><label>Nombre del destino</label><input class="inp" id="m-title" value="'+esc(m.title||'')+'"></div>'+
+    '<div class="field"><label>Subtítulo</label><input class="inp" id="m-sub" value="'+esc(m.subtitle||'')+'"></div>'+
+    '<div class="field"><label>Descripción</label><textarea class="inp" id="m-desc">'+esc(m.description||'')+'</textarea></div>'+
+    '<div class="field"><label>URL imagen portada (hero)</label><input class="inp" id="m-hero" value="'+esc(m.heroImage||'')+'" placeholder="https://..."></div>'+
+    '<div class="field"><label>📹 URL vídeo YouTube del destino</label><input class="inp" id="m-video" value="'+esc(m.videoUrl||'')+'" placeholder="https://www.youtube.com/watch?v=..."></div>'+
+    '<button class="btn btn-gold btn-sm" onclick="applyMeta()">✓ Aplicar</button>'+
     '</div>';
 }
 
-function updateMeta(){
-  if(!tour.meta)tour.meta={};
-  tour.meta.title=document.getElementById('m-title').value;
-  tour.meta.subtitle=document.getElementById('m-sub').value;
-  tour.meta.description=document.getElementById('m-desc').value;
-  tour.meta.heroImage=document.getElementById('m-hero').value;
-  tour.meta.videoUrl=document.getElementById('m-video').value;
-  markDirty();
+function applyMeta(){
+  if(!tour.meta) tour.meta={};
+  tour.meta.title=rd('m-title')||tour.meta.title;
+  tour.meta.subtitle=rd('m-sub')||'';
+  tour.meta.description=rd('m-desc')||'';
+  tour.meta.heroImage=rd('m-hero')||'';
+  tour.meta.videoUrl=rd('m-video')||'';
+  markDirty(); toast('✓ Configuración aplicada','ok');
 }
 
-// ── DAY ───────────────────────────────────────────────────────────────────────
+// ── DAY EDITOR ────────────────────────────────────────────────────────────────
 function showDay(){
-  if(!activeDay)return;
+  if(!curDay)return;
+  var stopsHtml=renderStopRows();
   document.getElementById('content').innerHTML=
-    '<div class="panel"><div class="panel-title">'+esc(activeDay.title||'Día')+'</div>' +
-    '<div class="field-row"><div class="field"><label>Título del día</label><input class="inp" id="dt" value="'+esc(activeDay.title||'')+'" oninput="updateDay()"></div>' +
-    '<div class="field"><label>Descripción</label><input class="inp" id="dd" value="'+esc(activeDay.description||'')+'" oninput="updateDay()"></div></div>' +
-    '<button class="btn btn-danger btn-sm" onclick="deleteDay()">🗑 Eliminar día</button></div>' +
+    '<div class="panel">'+
+      '<div class="panel-title">'+esc(curDay.title||'Día')+'</div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Título del día</label><input class="inp" id="day-t" value="'+esc(curDay.title||'')+'"></div>'+
+        '<div class="field"><label>Descripción</label><input class="inp" id="day-d" value="'+esc(curDay.description||'')+'"></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:0.6rem;">'+
+        '<button class="btn btn-sm" onclick="applyDayFields()">✓ Aplicar</button>'+
+        '<button class="btn btn-sm btn-danger" onclick="deleteDay()">🗑 Eliminar día</button>'+
+      '</div>'+
+    '</div>'+
 
-    '<div class="wizard"><div class="wizard-title">➕ Añadir atracción</div>' +
-    '<div class="field-row"><div class="field"><label>Nombre</label><input class="inp" id="nn" placeholder="Ej: Medina Azahara"></div>' +
-    '<div class="field"><label>Ciudad / Lugar</label><input class="inp" id="nl" value="'+esc((tour.meta&&tour.meta.title)||'')+'" placeholder="Córdoba, España"></div></div>' +
-    '<div class="field-row"><div class="field"><label>Tipo</label><select class="inp" id="nt">'+TYPES.map(function(t){return'<option value="'+t.id+'">'+t.icon+' '+t.label+'</option>';}).join('')+'</select></div>' +
-    '<div class="field"><label>Hora</label><input class="inp" id="ntm" placeholder="09:00"></div></div>' +
-    '<div style="display:flex;gap:0.6rem;flex-wrap:wrap;">' +
-    '<button class="btn btn-gold" onclick="genStop()">✨ Generar con IA</button>' +
-    '<button class="btn" onclick="addManual()">+ Manual</button></div>' +
-    '<div id="genbar" style="display:none;margin-top:0.7rem;display:none;align-items:center;gap:0.6rem;padding:0.7rem;background:rgba(201,168,76,0.04);border:1px solid var(--border);"><div class="spinner"></div><div id="genmsg" style="font-size:0.85rem;color:var(--parch);opacity:0.7;font-style:italic;">Generando…</div></div>' +
-    '</div>' +
+    '<div class="wizard">'+
+      '<div style="font-family:var(--display);font-size:0.9rem;color:var(--gold);margin-bottom:0.8rem;">➕ Añadir atracción</div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Nombre</label><input class="inp" id="nn" placeholder="Ej: Medina Azahara"></div>'+
+        '<div class="field"><label>Ciudad / Lugar</label><input class="inp" id="nl" value="'+esc((tour.meta&&tour.meta.title)||'')+'" placeholder="Córdoba, España"></div>'+
+      '</div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Tipo</label><select class="inp" id="nt">'+
+          TYPES.map(function(t){return'<option value="'+t.id+'">'+t.icon+' '+t.label+'</option>';}).join('')+
+        '</select></div>'+
+        '<div class="field"><label>Hora</label><input class="inp" id="ntm" placeholder="09:00"></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:0.6rem;flex-wrap:wrap;">'+
+        '<button class="btn btn-gold" onclick="genStop()">✨ Generar con IA</button>'+
+        '<button class="btn" onclick="addManual()">+ Manual</button>'+
+      '</div>'+
+      '<div id="genbar" style="display:none;align-items:center;gap:0.6rem;padding:0.65rem;background:rgba(201,168,76,0.04);border:1px solid var(--border);margin-top:0.6rem;">'+
+        '<div class="spinner"></div><div id="genmsg" style="font-size:0.83rem;color:var(--parch);opacity:0.7;font-style:italic;">Generando…</div>'+
+      '</div>'+
+    '</div>'+
 
-    '<div class="panel"><div class="panel-title">Paradas <span style="opacity:0.4;font-size:0.78rem;">· Arrastra para reordenar</span></div>' +
-    '<div id="stops-list">'+renderStops()+'</div></div>' +
+    '<div class="panel">'+
+      '<div class="panel-title">Paradas <span style="opacity:0.4;font-size:0.75rem;">· Arrastra para reordenar</span></div>'+
+      '<div id="stops-list">'+stopsHtml+'</div>'+
+    '</div>'+
+
     '<div id="stop-editor"></div>';
 
   initDrag();
 }
 
-function updateDay(){if(!activeDay)return;activeDay.title=document.getElementById('dt').value;activeDay.description=document.getElementById('dd').value;renderSidebar();markDirty();}
-function deleteDay(){if(!confirm('¿Eliminar este día?'))return;tour.days.splice(activeDayIdx,1);activeDayIdx=null;activeDay=null;renderSidebar();document.getElementById('content').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:60%;opacity:0.3;font-style:italic;">Selecciona un día</div>';markDirty();}
-
-function renderStops(){
-  if(!activeDay||!(activeDay.stops||[]).length)return '<div style="padding:1rem;text-align:center;opacity:0.4;font-style:italic;font-size:0.88rem;">Sin paradas. Usa el formulario de arriba.</div>';
-  return activeDay.stops.map(function(s,i){
-    var tm=tmeta(s.type);
-    return '<div class="stop-row" draggable="true" data-idx="'+i+'">' +
-      '<div class="drag-handle">⠿</div>' +
-      '<div style="width:26px;height:26px;border-radius:'+(s.type==='restaurant'?'4px':'50%')+';background:'+tm.color+';display:flex;align-items:center;justify-content:center;font-size:'+(s.type==='restaurant'?'1rem':'0.7rem')+';color:#0D1117;font-weight:700;flex-shrink:0;">'+(s.type==='restaurant'?tm.icon:(i+1))+'</div>' +
-      '<div style="flex:1;min-width:0;"><div style="font-size:0.9rem;color:var(--ivory);">'+esc(s.name)+'</div><div style="font-size:0.7rem;color:var(--parch);opacity:0.5;">'+tm.icon+' '+tm.label+(s.time?' · '+s.time:'')+'</div></div>' +
-      '<div style="display:flex;gap:0.35rem;">' +
-      '<button class="btn btn-sm btn-icon" onclick="editStop('+i+')">✏️</button>' +
-      '<button class="btn btn-sm btn-icon btn-danger" onclick="delStop('+i+')">🗑</button>' +
-      '</div></div>';
-  }).join('');
+function applyDayFields(){
+  if(!curDay)return;
+  var t=rd('day-t'), d=rd('day-d');
+  if(t!==null)curDay.title=t;
+  if(d!==null)curDay.description=d;
+  markDirty(); renderSidebar(); toast('✓ Día actualizado','ok');
 }
 
-// ── GENERATE ──────────────────────────────────────────────────────────────────
+function deleteDay(){
+  if(!confirm('¿Eliminar este día y sus paradas?'))return;
+  tour.days.splice(dayIdx,1);
+  dayIdx=null; curDay=null; stopIdx=null;
+  markDirty(); renderSidebar();
+  document.getElementById('content').innerHTML='<div style="padding:2rem;opacity:0.35;font-style:italic;">Selecciona un día</div>';
+}
+
+function renderStopRows(){
+  if(!curDay||!(curDay.stops||[]).length)
+    return '<div style="padding:1rem;text-align:center;opacity:0.35;font-style:italic;font-size:0.85rem;">Sin paradas. Usa el formulario de arriba.</div>';
+  var html='';
+  for(var i=0;i<curDay.stops.length;i++){
+    var s=curDay.stops[i], tm=tmeta(s.type);
+    html+='<div class="stop-row" draggable="true" data-idx="'+i+'">'+
+      '<div class="drag-handle">⠿</div>'+
+      '<div style="width:24px;height:24px;border-radius:'+(s.type==='restaurant'?'4px':'50%')+';background:'+tm.color+';display:flex;align-items:center;justify-content:center;font-size:'+(s.type==='restaurant'?'0.85rem':'0.68rem')+';color:#0D1117;font-weight:700;flex-shrink:0;">'+(s.type==='restaurant'?tm.icon:(i+1))+'</div>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:0.88rem;color:var(--ivory);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(s.name)+'</div>'+
+        '<div style="font-size:0.68rem;color:var(--parch);opacity:0.5;">'+tm.icon+' '+tm.label+(s.time?' · '+s.time:'')+'</div>'+
+      '</div>'+
+      '<button class="btn btn-sm btn-icon" onclick="editStop('+i+')" style="flex-shrink:0;">✏️</button>'+
+      '<button class="btn btn-sm btn-icon btn-danger" onclick="deleteStop('+i+')" style="flex-shrink:0;">🗑</button>'+
+    '</div>';
+  }
+  return html;
+}
+
+// ── GENERATE WITH AI ──────────────────────────────────────────────────────────
 async function genStop(){
-  var name=document.getElementById('nn').value.trim();
-  var loc=document.getElementById('nl').value.trim();
-  var type=document.getElementById('nt').value;
-  var time=document.getElementById('ntm').value.trim();
+  var name=(rd('nn')||'').trim();
+  var loc=(rd('nl')||'').trim();
+  var type=rd('nt')||'monument';
+  var time=(rd('ntm')||'').trim();
   if(!name){toast('Escribe el nombre','err');return;}
   if(!loc){toast('Escribe la ciudad','err');return;}
   var bar=document.getElementById('genbar');
   bar.style.display='flex';
-  document.getElementById('genmsg').textContent='🤖 Claude generando contenido…';
+  document.getElementById('genmsg').textContent='🤖 Claude generando…';
   try{
-    var res=await fetch('/.netlify/functions/generate',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:JSON.stringify({name:name,location:loc,type:type,city:tour.meta&&tour.meta.title})});
-    var d=await res.json();
-    if(d.error)throw new Error(d.error);
+    var r=await fetch('/.netlify/functions/generate',{method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':TOKEN},
+      body:JSON.stringify({name:name,location:loc,type:type,city:tour.meta&&tour.meta.title})});
+    var d=await r.json();
+    if(!r.ok||d.error) throw new Error(d.error||'Error generando');
     var stop=d.stop;
     stop.time=time||stop.suggestedTime||'';
     stop.duration=stop.suggestedDuration||'60 min';
-    stop.photos=[];stop.audioSections=stop.audioSections||[];
-    stop.videoUrl='';stop.website='';stop.bookingUrl='';stop.phone='';stop.priceRange='';
-    stop.address='';
-    document.getElementById('genmsg').textContent='🖼 Buscando fotos en Wikimedia…';
+    stop.photos=[];
+    stop.audioSections=stop.audioSections||[];
+    stop.videoUrl=''; stop.website=''; stop.bookingUrl='';
+    stop.phone=''; stop.priceRange=''; stop.address='';
+    document.getElementById('genmsg').textContent='🖼 Buscando fotos…';
     try{
       var wr=await fetch('/.netlify/functions/wikimedia?query='+encodeURIComponent(name+' '+loc));
       var wd=await wr.json();
-      if(wd.ok&&wd.photos&&wd.photos.length)stop.photos=wd.photos.slice(0,3).map(function(p){return p.url;});
+      if(wd.ok&&wd.photos&&wd.photos.length) stop.photos=wd.photos.slice(0,3).map(function(p){return p.url;});
     }catch(e){}
-    if(!activeDay.stops)activeDay.stops=[];
-    activeDay.stops.push(stop);
+    if(!curDay.stops) curDay.stops=[];
+    curDay.stops.push(stop);
     markDirty();
-    document.getElementById('nn').value='';document.getElementById('ntm').value='';
     bar.style.display='none';
+    document.getElementById('nn').value='';
+    document.getElementById('ntm').value='';
     showDay();
-    setTimeout(function(){editStop(activeDay.stops.length-1);},80);
+    setTimeout(function(){editStop(curDay.stops.length-1);},80);
     toast('✓ "'+name+'" añadida con IA','ok');
-  }catch(e){bar.style.display='none';toast('Error: '+e.message,'err');}
+  }catch(e){
+    bar.style.display='none';
+    toast('Error: '+e.message,'err');
+  }
 }
 
 function addManual(){
-  var name=document.getElementById('nn').value.trim()||'Nueva parada';
-  var loc=document.getElementById('nl').value.trim();
-  var type=document.getElementById('nt').value;
-  var time=document.getElementById('ntm').value.trim();
+  var name=(rd('nn')||'Nueva parada').trim();
+  var loc=(rd('nl')||'').trim();
+  var type=rd('nt')||'monument';
+  var time=(rd('ntm')||'').trim();
   var tm=tmeta(type);
-  var stop={id:'stop-'+Date.now(),name:name,location:loc,type:type,time:time,duration:'60 min',color:tm.color,
-    subtitle:'',description:'',history:'',audioSections:[],videoUrl:'',
-    facts:[],tips:[],photos:[],dishes:null,website:'',bookingUrl:'',phone:'',priceRange:'',address:'',
-    order:(activeDay.stops||[]).length+1};
-  if(!activeDay.stops)activeDay.stops=[];
-  activeDay.stops.push(stop);
-  markDirty();showDay();
-  setTimeout(function(){editStop(activeDay.stops.length-1);},80);
+  var stop={id:'stop-'+Date.now(),name:name,location:loc,type:type,time:time,
+    duration:'60 min',color:tm.color,subtitle:'',description:'',history:'',
+    audioSections:[],videoUrl:'',facts:[],tips:[],photos:[],dishes:null,
+    website:'',bookingUrl:'',phone:'',priceRange:'',address:'',
+    order:(curDay.stops||[]).length+1};
+  if(!curDay.stops) curDay.stops=[];
+  curDay.stops.push(stop);
+  markDirty(); showDay();
+  setTimeout(function(){editStop(curDay.stops.length-1);},80);
 }
 
 // ── STOP EDITOR ───────────────────────────────────────────────────────────────
-function editStop(idx){
-  editIdx=idx;
-  var s=activeDay.stops[idx];
+function editStop(i){
+  stopIdx=i;
+  var s=curDay.stops[i];
   var tm=tmeta(s.type);
   var isRest=s.type==='restaurant';
+  curTab='info';
 
-  var sectionsHtml='';
-  (s.audioSections||[]).forEach(function(sec,si){
-    var hasMap=sec.mapImage&&sec.mapImage.length>0;
-    sectionsHtml+='<div class="section-card"><div class="section-card-header">' +
-      '<div style="width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">'+(si+1)+'</div>' +
-      '<div style="flex:1;font-size:0.88rem;color:var(--ivory);">'+esc(sec.title||'Sección '+(si+1))+'</div>' +
-      '<button class="btn btn-sm btn-danger btn-icon" onclick="delSection('+si+')">✕</button></div>' +
-      '<div class="field"><label>Título de la sección</label><input class="inp" id="sec-t-'+si+'" value="'+esc(sec.title||'')+'"></div>' +
-      '<div class="field"><label>Texto de la narración</label><textarea class="inp" id="sec-x-'+si+'" style="min-height:90px;">'+esc(sec.text||'')+'</textarea></div>' +
-      '<div class="field"><label>🗺 Imagen de mapa o plano interior</label>' +
-        '<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;">' +
-          (hasMap?'<img src="'+esc(sec.mapImage)+'" style="width:80px;height:60px;object-fit:cover;border:1px solid rgba(201,168,76,0.3);">'
-                 :'<div style="width:80px;height:60px;border:1px dashed rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:rgba(201,168,76,0.4);">Sin imagen</div>') +
-          '<div style="display:flex;flex-direction:column;gap:0.3rem;">' +
-            '<button class="btn btn-sm" onclick="uploadSectionImg('+si+')">📷 Subir imagen</button>' +
-            (hasMap?'<button class="btn btn-sm btn-danger" onclick="clearSectionImg('+si+')">✕ Quitar</button>':'')+
-          '</div>' +
-        '</div>' +
-        '<input class="inp" id="sec-m-'+si+'" value="'+esc(sec.mapImage||'')+'" placeholder="O pega una URL https://..." style="font-size:0.8rem;">' +
-      '</div>' +
-      '</div>';
-  });
-
-  var dishesHtml='';
-  if(isRest){
-    (s.dishes||[]).forEach(function(d,di){
-      dishesHtml+='<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">' +
-        '<input class="inp" id="dn-'+di+'" placeholder="Plato" value="'+esc(d.name||'')+'" style="flex:1;">' +
-        '<input class="inp" id="dd-'+di+'" placeholder="Descripción" value="'+esc(d.description||'')+'" style="flex:2;">' +
-        '<button class="btn btn-sm btn-danger btn-icon" onclick="delDish('+di+')">✕</button></div>';
-    });
+  var photosHtml='';
+  var photos=s.photos||[];
+  for(var pi=0;pi<photos.length;pi++){
+    photosHtml+='<div style="position:relative;width:88px;height:66px;overflow:hidden;border:1px solid rgba(201,168,76,0.3);">'+
+      '<img src="'+esc(photos[pi])+'" style="width:100%;height:100%;object-fit:cover;">'+
+      '<button onclick="removePhoto('+pi+')" style="position:absolute;top:2px;right:2px;background:rgba(232,64,64,0.85);border:none;color:white;width:15px;height:15px;cursor:pointer;font-size:0.55rem;border-radius:2px;line-height:1;">✕</button>'+
+    '</div>';
   }
 
-  // Photo strip
-  var photosHtml=(s.photos||[]).map(function(p,pi){
-    return '<div style="position:relative;width:90px;height:68px;overflow:hidden;border:1px solid rgba(201,168,76,0.3);">' +
-      '<img src="'+p+'" style="width:100%;height:100%;object-fit:cover;">' +
-      '<button onclick="removePhoto('+pi+')" style="position:absolute;top:2px;right:2px;background:rgba(232,64,64,0.85);border:none;color:white;width:16px;height:16px;cursor:pointer;font-size:0.6rem;border-radius:2px;">✕</button></div>';
-  }).join('');
+  var secHtml='';
+  var secs=s.audioSections||[];
+  for(var si=0;si<secs.length;si++){
+    var sec=secs[si];
+    var hasMap=sec.mapImage&&sec.mapImage.length>0;
+    secHtml+='<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:0.9rem;margin-bottom:0.6rem;">'+
+      '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;">'+
+        '<div style="width:20px;height:20px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;">'+(si+1)+'</div>'+
+        '<div style="flex:1;font-size:0.85rem;color:var(--ivory);">'+esc(sec.title||'Sección '+(si+1))+'</div>'+
+        '<button class="btn btn-sm btn-danger btn-icon" onclick="delSection('+si+')">✕</button>'+
+      '</div>'+
+      '<div class="field"><label>Título de la sección</label><input class="inp" id="sec-t-'+si+'" value="'+esc(sec.title||'')+'"></div>'+
+      '<div class="field"><label>Narración</label><textarea class="inp" id="sec-x-'+si+'" style="min-height:85px;">'+esc(sec.text||'')+'</textarea></div>'+
+      '<div class="field"><label>🗺 Imagen de mapa / plano interior</label>'+
+        '<div style="display:flex;gap:0.6rem;align-items:center;margin-bottom:0.4rem;">'+
+          (hasMap?'<img src="'+esc(sec.mapImage)+'" style="width:80px;height:60px;object-fit:cover;border:1px solid rgba(201,168,76,0.3);">'
+                 :'<div style="width:80px;height:60px;border:1px dashed rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:0.68rem;color:rgba(201,168,76,0.35);">Sin imagen</div>')+
+          '<div style="display:flex;flex-direction:column;gap:0.3rem;">'+
+            '<button class="btn btn-sm" onclick="uploadSectionImg('+si+')">📷 Subir</button>'+
+            (hasMap?'<button class="btn btn-sm btn-danger" onclick="clearSectionImg('+si+')">✕ Quitar</button>':'')+
+          '</div>'+
+        '</div>'+
+        '<input class="inp" id="sec-m-'+si+'" value="'+esc(sec.mapImage||'')+'" placeholder="O pega URL https://..." style="font-size:0.78rem;">'+
+      '</div>'+
+    '</div>';
+  }
+
+  var dishHtml='';
+  if(isRest){
+    var dishes=s.dishes||[];
+    for(var di=0;di<dishes.length;di++){
+      dishHtml+='<div style="display:flex;gap:0.45rem;margin-bottom:0.45rem;align-items:center;">'+
+        '<input class="inp" id="dn-'+di+'" value="'+esc(dishes[di].name||'')+'" placeholder="Plato" style="flex:1;">'+
+        '<input class="inp" id="dd-'+di+'" value="'+esc(dishes[di].description||'')+'" placeholder="Descripción" style="flex:2;">'+
+        '<button class="btn btn-sm btn-danger btn-icon" onclick="delDish('+di+')">✕</button>'+
+      '</div>';
+    }
+  }
+
+  var factsHtml='';
+  var facts=s.facts||[];
+  for(var fi=0;fi<3;fi++){
+    var f=facts[fi]||{value:'',label:''};
+    factsHtml+='<div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;">'+
+      '<input class="inp" id="fv'+fi+'" value="'+esc(f.value||'')+'" placeholder="Valor" style="width:38%;">'+
+      '<input class="inp" id="fl'+fi+'" value="'+esc(f.label||'')+'" placeholder="Etiqueta" style="flex:1;">'+
+    '</div>';
+  }
 
   document.getElementById('stop-editor').innerHTML=
-    '<div class="panel" style="border-color:rgba(201,168,76,0.3);">' +
-    '<div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:1rem;">' +
-      '<div style="width:28px;height:28px;border-radius:'+(isRest?'4px':'50%')+';background:'+tm.color+';display:flex;align-items:center;justify-content:center;font-size:'+(isRest?'1rem':'0.75rem')+';color:#0D1117;font-weight:700;">'+tm.icon+'</div>' +
-      '<div class="panel-title" style="margin-bottom:0;border:none;padding:0;flex:1;">Editando: '+esc(s.name)+'</div>' +
-      '<button class="btn btn-sm" onclick="closeEditor()">✕</button></div>' +
+    '<div class="panel" style="border-color:rgba(201,168,76,0.3);">'+
+      '<div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.9rem;">'+
+        '<div style="width:27px;height:27px;border-radius:'+(isRest?'4px':'50%')+';background:'+tm.color+';display:flex;align-items:center;justify-content:center;font-size:'+(isRest?'0.9rem':'0.72rem')+';color:#0D1117;font-weight:700;">'+tm.icon+'</div>'+
+        '<div class="panel-title" style="margin-bottom:0;border:none;padding:0;flex:1;">Editando: '+esc(s.name)+'</div>'+
+        '<button class="btn btn-sm" onclick="closeEditor()">✕</button>'+
+      '</div>'+
 
-    // Basic info tab
-    '<div class="tab-bar"><button class="tab-btn active" id="tab-info" onclick="switchTab(\'info\')">Información</button>' +
-    '<button class="tab-btn" id="tab-audio" onclick="switchTab(\'audio\')">🎧 Audioguía</button>' +
-    (isRest?'<button class="tab-btn" id="tab-rest" onclick="switchTab(\'rest\')">🍽 Restaurante</button>':'')+
-    '<button class="tab-btn" id="tab-media" onclick="switchTab(\'media\')">📷 Fotos/Vídeo</button></div>' +
+      '<div class="tab-bar">'+
+        '<button class="tab active" id="tab-info" onclick="switchTab(\'info\')">Información</button>'+
+        '<button class="tab" id="tab-audio" onclick="switchTab(\'audio\')">🎧 Audioguía</button>'+
+        (isRest?'<button class="tab" id="tab-rest" onclick="switchTab(\'rest\')">🍽 Restaurante</button>':'')+
+        '<button class="tab" id="tab-media" onclick="switchTab(\'media\')">📷 Fotos/Vídeo</button>'+
+      '</div>'+
 
-    // INFO TAB
-    '<div id="tab-info-content">' +
-    '<div class="field-row"><div class="field"><label>Nombre</label><input class="inp" id="se-name" value="'+esc(s.name||'')+'"></div>' +
-    '<div class="field"><label>Subtítulo</label><input class="inp" id="se-sub" value="'+esc(s.subtitle||'')+'"></div></div>' +
-    '<div class="field-row-3">' +
-      '<div class="field"><label>Tipo</label><select class="inp" id="se-type">'+TYPES.map(function(t){return'<option value="'+t.id+'"'+(s.type===t.id?' selected':'')+'>'+t.icon+' '+t.label+'</option>';}).join('')+'</select></div>' +
-      '<div class="field"><label>Hora</label><input class="inp" id="se-time" value="'+esc(s.time||'')+'"></div>' +
-      '<div class="field"><label>Duración</label><input class="inp" id="se-dur" value="'+esc(s.duration||'')+'"></div></div>' +
-    '<div class="field"><label>Dirección</label><input class="inp" id="se-addr" value="'+esc(s.address||'')+'" placeholder="Calle, número, ciudad"></div>' +
-    '<div class="field-row"><div class="field"><label>Latitud</label><input class="inp" id="se-lat" value="'+(s.lat||'')+'" placeholder="37.8789"></div>' +
-    '<div class="field"><label>Longitud</label><input class="inp" id="se-lng" value="'+(s.lng||'')+'" placeholder="-4.7794"></div></div>' +
-    '<div class="field"><label>Descripción</label><textarea class="inp" id="se-desc">'+esc(s.description||'')+'</textarea></div>' +
-    '<div class="field"><label>Historia / Contexto</label><textarea class="inp" id="se-hist">'+esc(s.history||'')+'</textarea></div>' +
-    '<div class="field"><label>Consejos (uno por línea)</label><textarea class="inp" id="se-tips">'+esc((s.tips||[]).join('\n'))+'</textarea></div>' +
-    '<div class="field"><label>Datos clave</label>' +
-    [0,1,2].map(function(fi){var f=(s.facts||[])[fi]||{value:'',label:''};return'<div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;"><input class="inp" id="fv'+fi+'" value="'+esc(f.value)+'" placeholder="Valor" style="width:35%;"><input class="inp" id="fl'+fi+'" value="'+esc(f.label)+'" placeholder="Etiqueta" style="flex:1;"></div>';}).join('') +
-    '</div>' +
-    '<div class="field"><label>🌐 Sitio web</label><input class="inp" id="se-web" value="'+esc(s.website||'')+'" placeholder="https://..."></div>' +
-    '</div>' + // end info tab
+      // INFO TAB
+      '<div id="tc-info">'+
+        '<div class="row2"><div class="field"><label>Nombre</label><input class="inp" id="se-name" value="'+esc(s.name||'')+'"></div>'+
+        '<div class="field"><label>Subtítulo</label><input class="inp" id="se-sub" value="'+esc(s.subtitle||'')+'"></div></div>'+
+        '<div class="row3">'+
+          '<div class="field"><label>Tipo</label><select class="inp" id="se-type">'+TYPES.map(function(t){return'<option value="'+t.id+'"'+(s.type===t.id?' selected':'')+'>'+t.icon+' '+t.label+'</option>';}).join('')+'</select></div>'+
+          '<div class="field"><label>Hora</label><input class="inp" id="se-time" value="'+esc(s.time||'')+'"></div>'+
+          '<div class="field"><label>Duración</label><input class="inp" id="se-dur" value="'+esc(s.duration||'')+'"></div>'+
+        '</div>'+
+        '<div class="field"><label>Dirección</label><input class="inp" id="se-addr" value="'+esc(s.address||'')+'"></div>'+
+        '<div class="row2">'+
+          '<div class="field"><label>Latitud</label><input class="inp" id="se-lat" value="'+(s.lat||'')+'" placeholder="37.8789"></div>'+
+          '<div class="field"><label>Longitud</label><input class="inp" id="se-lng" value="'+(s.lng||'')+'" placeholder="-4.7794"></div>'+
+        '</div>'+
+        '<div class="field"><label>Descripción</label><textarea class="inp" id="se-desc">'+esc(s.description||'')+'</textarea></div>'+
+        '<div class="field"><label>Historia</label><textarea class="inp" id="se-hist">'+esc(s.history||'')+'</textarea></div>'+
+        '<div class="field"><label>Consejos (uno por línea)</label><textarea class="inp" id="se-tips">'+esc((s.tips||[]).join('\n'))+'</textarea></div>'+
+        '<div class="field"><label>Datos clave</label>'+factsHtml+'</div>'+
+        '<div class="field"><label>🌐 Sitio web</label><input class="inp" id="se-web" value="'+esc(s.website||'')+'" placeholder="https://..."></div>'+
+      '</div>'+
 
-    // AUDIO TAB
-    '<div id="tab-audio-content" style="display:none;">' +
-    '<div style="margin-bottom:0.8rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">' +
-      '<div style="font-size:0.72rem;color:var(--parch);opacity:0.6;font-style:italic;flex:1;">Divide la audioguía en secciones para una experiencia más inmersiva. Cada sección puede tener un mapa o imagen del interior.</div>' +
-      '<button class="btn btn-sm" onclick="addSection()">+ Añadir sección</button>' +
-    '</div>' +
-    '<div id="sections-container">'+sectionsHtml+'</div>' +
-    '</div>' + // end audio tab
+      // AUDIO TAB
+      '<div id="tc-audio" style="display:none;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.7rem;">'+
+          '<div style="font-size:0.7rem;color:var(--parch);opacity:0.55;font-style:italic;">Divide la audioguía en secciones. Cada una puede tener un plano interior.</div>'+
+          '<button class="btn btn-sm" onclick="addSection()">+ Sección</button>'+
+        '</div>'+
+        '<div id="secs-container">'+secHtml+'</div>'+
+      '</div>'+
 
-    // RESTAURANT TAB
-    (isRest?
-    '<div id="tab-rest-content" style="display:none;">' +
-    '<div class="field-row"><div class="field"><label>Teléfono</label><input class="inp" id="se-phone" value="'+esc(s.phone||'')+'" placeholder="+34 ..."></div>' +
-    '<div class="field"><label>Precio (€ / €€ / €€€)</label><input class="inp" id="se-price" value="'+esc(s.priceRange||'')+'" placeholder="€€"></div></div>' +
-    '<div class="field"><label>🗓 URL de reservas</label><input class="inp" id="se-book" value="'+esc(s.bookingUrl||'')+'" placeholder="https://thefork.es/..."></div>' +
-    '<div class="field"><label>Platos recomendados</label><div id="dishes-container">'+dishesHtml+'</div>' +
-    '<button class="btn btn-sm" onclick="addDish()" style="margin-top:0.4rem;">+ Añadir plato</button></div>' +
-    '</div>' : '') +
+      // RESTAURANT TAB
+      (isRest?
+      '<div id="tc-rest" style="display:none;">'+
+        '<div class="row2">'+
+          '<div class="field"><label>Teléfono</label><input class="inp" id="se-phone" value="'+esc(s.phone||'')+'" placeholder="+34 ..."></div>'+
+          '<div class="field"><label>Precio (€ / €€ / €€€)</label><input class="inp" id="se-price" value="'+esc(s.priceRange||'')+'" placeholder="€€"></div>'+
+        '</div>'+
+        '<div class="field"><label>🗓 URL de reservas</label><input class="inp" id="se-book" value="'+esc(s.bookingUrl||'')+'" placeholder="https://..."></div>'+
+        '<div class="field"><label>Platos recomendados</label>'+
+          '<div id="dishes-cont">'+dishHtml+'</div>'+
+          '<button class="btn btn-sm" onclick="addDish()" style="margin-top:0.4rem;">+ Añadir plato</button>'+
+        '</div>'+
+      '</div>'
+      :'')+
 
-    // MEDIA TAB
-    '<div id="tab-media-content" style="display:none;">' +
-    '<div class="field"><label>📹 URL vídeo YouTube</label><input class="inp" id="se-video" value="'+esc(s.videoUrl||'')+'" placeholder="https://www.youtube.com/watch?v=..."></div>' +
-    '<div class="field"><label>Fotos</label>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.7rem;">'+photosHtml+
-    '<label onclick="doUpload()" style="width:90px;height:68px;border:1px dashed rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:0.2rem;color:rgba(201,168,76,0.5);font-size:0.72rem;">📷<span>Subir</span></label></div>' +
-    '<button class="btn btn-sm" onclick="searchWiki()">🔍 Buscar en Wikimedia</button>' +
-    '<div id="wiki-grid" style="margin-top:0.7rem;"></div></div>' +
-    '</div>' + // end media tab
+      // MEDIA TAB
+      '<div id="tc-media" style="display:none;">'+
+        '<div class="field"><label>📹 URL Vídeo YouTube</label><input class="inp" id="se-video" value="'+esc(s.videoUrl||'')+'" placeholder="https://www.youtube.com/watch?v=..."></div>'+
+        '<div class="field"><label>Fotos</label>'+
+          '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:0.65rem;">'+photosHtml+
+            '<label onclick="uploadPhoto()" style="width:88px;height:66px;border:1px dashed rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:0.15rem;color:rgba(201,168,76,0.45);font-size:0.7rem;">📷<span>Subir</span></label>'+
+          '</div>'+
+          '<button class="btn btn-sm" onclick="searchWiki()">🔍 Buscar en Wikimedia</button>'+
+          '<div id="wiki-grid" style="margin-top:0.65rem;"></div>'+
+        '</div>'+
+      '</div>'+
 
-    '<div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem;">' +
-    '<button class="btn btn-gold" onclick="saveStop()">&#10003; Aplicar cambios</button>' +
-    '<div style="font-size:0.68rem;color:var(--parch);opacity:0.5;font-style:italic;margin-top:0.4rem;">Tras editar, pulsa Aplicar cambios y luego 💾 Guardar en la barra superior.</div>' +
-    '<button class="btn btn-danger btn-sm" onclick="delStop('+idx+')">🗑 Eliminar</button>' +
-    '</div></div>';
+      '<div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.9rem;border-top:1px solid var(--border);padding-top:0.9rem;">'+
+        '<button class="btn btn-gold" onclick="applyStopFields()">✓ Aplicar cambios</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteStop('+i+')">🗑 Eliminar</button>'+
+      '</div>'+
+    '</div>';
 
   document.getElementById('stop-editor').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function switchTab(tab){
-  ['info','audio','rest','media'].forEach(function(t){
-    var btn=document.getElementById('tab-'+t);
-    var content=document.getElementById('tab-'+t+'-content');
-    if(btn)btn.classList.toggle('active',t===tab);
-    if(content)content.style.display=t===tab?'block':'none';
-  });
+function switchTab(t){
+  curTab=t;
+  var tabs=['info','audio','rest','media'];
+  for(var i=0;i<tabs.length;i++){
+    var btn=document.getElementById('tab-'+tabs[i]);
+    var cont=document.getElementById('tc-'+tabs[i]);
+    if(btn) btn.classList.toggle('active',tabs[i]===t);
+    if(cont) cont.style.display=tabs[i]===t?'block':'none';
+  }
 }
 
-function closeEditor(){editIdx=null;document.getElementById('stop-editor').innerHTML='';}
+function closeEditor(){stopIdx=null;document.getElementById('stop-editor').innerHTML='';}
 
-function saveStop(){
-  if(editIdx===null){toast('Abre un editor primero','err');return;}
-  var s=activeDay.stops[editIdx];
-  _readStopFields(s);
-  markDirty();
-  document.getElementById('stops-list').innerHTML=renderStops();
-  initDrag();
-  var info='✓ '+s.name+' — fotos:'+s.photos.length+(s.videoUrl?' + vídeo':'');
-  toast(info,'ok');
-}
+// ── APPLY STOP FIELDS (reads ALL inputs regardless of tab visibility) ─────────
+function applyStopFields(){
+  if(stopIdx===null||!curDay||!curDay.stops[stopIdx])return;
+  var s=curDay.stops[stopIdx];
 
-function v(id){var el=document.getElementById(id);return el?el.value:'';}
+  // Basic fields - always in DOM when editor is open
+  var v=rd('se-name');   if(v!==null&&v!=='') s.name=v;
+  var v=rd('se-sub');    if(v!==null) s.subtitle=v;
+  var v=rd('se-type');   if(v!==null&&v!=='') s.type=v;
+  var v=rd('se-time');   if(v!==null) s.time=v;
+  var v=rd('se-dur');    if(v!==null) s.duration=v;
+  var v=rd('se-addr');   if(v!==null) s.address=v;
+  var v=rd('se-desc');   if(v!==null) s.description=v;
+  var v=rd('se-hist');   if(v!==null) s.history=v;
+  var v=rd('se-web');    if(v!==null) s.website=v;
+  var v=rd('se-video');  if(v!==null) s.videoUrl=v;
+  var v=rd('se-phone');  if(v!==null) s.phone=v;
+  var v=rd('se-price');  if(v!==null) s.priceRange=v;
+  var v=rd('se-book');   if(v!==null) s.bookingUrl=v;
 
-// Read ALL stop editor fields into stop object - works regardless of tab visibility
-function _readStopFields(s){
-  if(!s)return;
-  // Helper: read field value only if element exists
-  function rd(id){var el=document.getElementById(id);return el?el.value:null;}
-  
-  var n=rd('se-name');    if(n!==null&&n!=='')s.name=n;
-  var sub=rd('se-sub');   if(sub!==null)s.subtitle=sub;
-  var typ=rd('se-type');  if(typ!==null&&typ!=='')s.type=typ;
-  var tm=rd('se-time');   if(tm!==null)s.time=tm;
-  var dur=rd('se-dur');   if(dur!==null)s.duration=dur;
-  var adr=rd('se-addr');  if(adr!==null)s.address=adr;
-  var dsc=rd('se-desc');  if(dsc!==null)s.description=dsc;
-  var hst=rd('se-hist');  if(hst!==null)s.history=hst;
-  var tps=rd('se-tips');  if(tps!==null)s.tips=tps.split('\n').map(function(t){return t.trim();}).filter(Boolean);
-  var web=rd('se-web');   if(web!==null)s.website=web;
-  var vid=rd('se-video'); if(vid!==null)s.videoUrl=vid;
+  var tipsEl=document.getElementById('se-tips');
+  if(tipsEl) s.tips=tipsEl.value.split('\n').map(function(t){return t.trim();}).filter(Boolean);
+
   var lat=parseFloat(rd('se-lat'));
   var lng=parseFloat(rd('se-lng'));
-  if(!isNaN(lat))s.lat=lat;
-  if(!isNaN(lng))s.lng=lng;
-  
-  if(s.type){
-    var found=TYPES.find(function(t){return t.id===s.type;});
-    if(found)s.color=found.color;
-  }
-  
+  if(!isNaN(lat)) s.lat=lat;
+  if(!isNaN(lng)) s.lng=lng;
+
+  s.color=(tmeta(s.type)||{color:s.color}).color;
+
   // Facts
   var facts=[];
   for(var fi=0;fi<3;fi++){
-    var fv=rd('fv'+fi), fl=rd('fl'+fi);
-    if(fv!==null||fl!==null){
-      var fvv=fv||'', fll=fl||'';
-      if(fvv||fll)facts.push({value:fvv,label:fll});
-    }
+    var fv=rd('fv'+fi)||'', fl=rd('fl'+fi)||'';
+    if(fv||fl) facts.push({value:fv,label:fl});
   }
-  if(facts.length>0)s.facts=facts;
-  
-  // Audio sections — read if fields exist
+  s.facts=facts;
+
+  // Audio sections
   var secs=s.audioSections||[];
-  var newSecs=secs.map(function(sec,si){
-    var tt=rd('sec-t-'+si), tx=rd('sec-x-'+si), mp=rd('sec-m-'+si);
-    return {
-      id:sec.id||('as-'+si),
-      title:tt!==null?tt:sec.title,
-      text:tx!==null?tx:sec.text,
-      mapImage:mp!==null?mp:(sec.mapImage||'')
-    };
-  });
-  if(newSecs.length>0)s.audioSections=newSecs;
-  
-  // Restaurant fields
-  var ph=rd('se-phone');  if(ph!==null)s.phone=ph;
-  var pr=rd('se-price');  if(pr!==null)s.priceRange=pr;
-  var bk=rd('se-book');   if(bk!==null)s.bookingUrl=bk;
-  
-  // Dishes
-  if(s.dishes&&s.dishes.length>0){
-    s.dishes=s.dishes.map(function(d,di){
-      var dn=rd('dn-'+di), dd=rd('dd-'+di);
-      return{name:dn!==null?dn:d.name, description:dd!==null?dd:d.description};
-    });
+  for(var si=0;si<secs.length;si++){
+    var t=rd('sec-t-'+si); if(t!==null) secs[si].title=t;
+    var x=rd('sec-x-'+si); if(x!==null) secs[si].text=x;
+    var m=rd('sec-m-'+si); if(m!==null) secs[si].mapImage=m;
   }
+  s.audioSections=secs;
+
+  // Dishes
+  var dishes=s.dishes||[];
+  for(var di=0;di<dishes.length;di++){
+    var dn=rd('dn-'+di); if(dn!==null) dishes[di].name=dn;
+    var dd=rd('dd-'+di); if(dd!==null) dishes[di].description=dd;
+  }
+  if(dishes.length>0) s.dishes=dishes;
+
+  markDirty();
+  document.getElementById('stops-list').innerHTML=renderStopRows();
+  initDrag();
+  toast('✓ '+s.name+' — fotos:'+((s.photos||[]).length)+(s.videoUrl?' + vídeo':''),'ok');
 }
 
-function delStop(idx){if(!confirm('¿Eliminar parada?'))return;activeDay.stops.splice(idx,1);markDirty();closeEditor();document.getElementById('stops-list').innerHTML=renderStops();initDrag();}
+function deleteStop(i){
+  if(!confirm('¿Eliminar esta parada?'))return;
+  curDay.stops.splice(i,1);
+  markDirty(); closeEditor();
+  document.getElementById('stops-list').innerHTML=renderStopRows();
+  initDrag();
+}
 
-// Upload image for audio section
+// ── SECTIONS ──────────────────────────────────────────────────────────────────
+function addSection(){
+  if(stopIdx===null)return;
+  applyStopFields(); // save current state first
+  var s=curDay.stops[stopIdx];
+  if(!s.audioSections) s.audioSections=[];
+  s.audioSections.push({id:'as-'+Date.now(),title:'Sección '+(s.audioSections.length+1),text:'',mapImage:''});
+  editStop(stopIdx); switchTab('audio');
+}
+
+function delSection(si){
+  if(stopIdx===null)return;
+  applyStopFields();
+  curDay.stops[stopIdx].audioSections.splice(si,1);
+  editStop(stopIdx); switchTab('audio');
+}
+
 function uploadSectionImg(si){
-  if(editIdx===null)return;
+  if(stopIdx===null)return;
   document.getElementById('fup').onchange=function(e){
-    var file=e.target.files[0];if(!file)return;
+    var file=e.target.files[0];
+    if(!file)return;
     if(file.size>5*1024*1024){toast('Imagen demasiado grande (máx 5MB)','err');return;}
     var r=new FileReader();
     r.onload=function(ev){
       var parts=ev.target.result.split(',');
       var mime=parts[0].replace('data:','').replace(';base64','');
       var b64=parts[1];
-      var key='sec-img-'+Date.now();
+      var key='sec-'+Date.now();
       toast('Subiendo imagen…','ok');
       fetch('/.netlify/functions/upload',{method:'POST',
-        headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},
+        headers:{'Content-Type':'application/json','x-admin-token':TOKEN},
         body:JSON.stringify({key:key,data:b64,mime:mime})})
         .then(function(r){return r.json();})
         .then(function(d){
           if(d.error){toast('Error: '+d.error,'err');return;}
-          var url=d.repo
-            ?'https://raw.githubusercontent.com/'+d.repo+'/main/'+d.path
-            :ev.target.result; // fallback to data URL
-          activeDay.stops[editIdx].audioSections[si].mapImage=url;
+          var url=d.repo?'https://raw.githubusercontent.com/'+d.repo+'/main/'+d.path:ev.target.result;
+          applyStopFields();
+          curDay.stops[stopIdx].audioSections[si].mapImage=url;
           markDirty();
-          // Update the input field and preview directly without full re-render
-          var inp=document.getElementById('sec-m-'+si);
-          if(inp)inp.value=url;
-          editStop(editIdx);switchTab('audio');
+          editStop(stopIdx); switchTab('audio');
           toast('✓ Imagen subida','ok');
         })
-        .catch(function(err){toast('Error: '+err.message,'err');});
+        .catch(function(e){toast('Error: '+e.message,'err');});
     };
     r.readAsDataURL(file);
   };
@@ -558,176 +643,194 @@ function uploadSectionImg(si){
 }
 
 function clearSectionImg(si){
-  if(editIdx===null)return;
-  activeDay.stops[editIdx].audioSections[si].mapImage='';
-  markDirty();
-  editStop(editIdx);switchTab('audio');
+  if(stopIdx===null)return;
+  applyStopFields();
+  curDay.stops[stopIdx].audioSections[si].mapImage='';
+  markDirty(); editStop(stopIdx); switchTab('audio');
 }
 
-// Audio sections
-function addSection(){
-  if(editIdx===null)return;
-  var s=activeDay.stops[editIdx];
-  if(!s.audioSections)s.audioSections=[];
-  s.audioSections.push({id:'as-'+Date.now(),title:'Sección '+(s.audioSections.length+1),text:'',mapImage:''});
-  editStop(editIdx); switchTab('audio');
+// ── DISHES ────────────────────────────────────────────────────────────────────
+function addDish(){
+  if(stopIdx===null)return;
+  applyStopFields();
+  var s=curDay.stops[stopIdx];
+  if(!s.dishes) s.dishes=[];
+  s.dishes.push({name:'',description:''});
+  editStop(stopIdx); switchTab('rest');
 }
-function delSection(si){if(editIdx===null)return;activeDay.stops[editIdx].audioSections.splice(si,1);editStop(editIdx);switchTab('audio');}
 
-// Dishes
-function addDish(){if(editIdx===null)return;var s=activeDay.stops[editIdx];if(!s.dishes)s.dishes=[];s.dishes.push({name:'',description:''});editStop(editIdx);switchTab('rest');}
-function delDish(di){if(editIdx===null)return;activeDay.stops[editIdx].dishes.splice(di,1);editStop(editIdx);switchTab('rest');}
+function delDish(di){
+  if(stopIdx===null)return;
+  applyStopFields();
+  curDay.stops[stopIdx].dishes.splice(di,1);
+  editStop(stopIdx); switchTab('rest');
+}
 
-// Photos
+// ── PHOTOS ────────────────────────────────────────────────────────────────────
 function removePhoto(pi){
-  if(editIdx===null)return;
-  var s=activeDay.stops[editIdx];
-  _readStopFields(s);  // preserve all current field values
-  s.photos.splice(pi,1);
-  markDirty();editStop(editIdx);switchTab('media');
+  if(stopIdx===null)return;
+  applyStopFields();
+  curDay.stops[stopIdx].photos.splice(pi,1);
+  markDirty(); editStop(stopIdx); switchTab('media');
 }
 
-function doUpload(){
+function uploadPhoto(){
+  if(stopIdx===null)return;
   document.getElementById('fup').onchange=function(e){
-    var file=e.target.files[0];if(!file||editIdx===null)return;
+    var file=e.target.files[0];
+    if(!file)return;
+    if(file.size>8*1024*1024){toast('Imagen demasiado grande (máx 8MB)','err');return;}
     var r=new FileReader();
     r.onload=function(ev){
       var parts=ev.target.result.split(',');
       var mime=parts[0].replace('data:','').replace(';base64','');
       var b64=parts[1];
-      var key='s-'+Date.now();
+      var key='photo-'+Date.now();
       toast('Subiendo foto…','ok');
-      var REPO = (window.GITHUB_REPO || '');
-      fetch('/.netlify/functions/upload',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},
+      fetch('/.netlify/functions/upload',{method:'POST',
+        headers:{'Content-Type':'application/json','x-admin-token':TOKEN},
         body:JSON.stringify({key:key,data:b64,mime:mime})})
-        .then(function(r){return r.json();}).then(function(d){
-          if(d.error){toast('Error subiendo: '+d.error,'err');return;}
-          // Use GitHub raw URL so image loads directly without needing a function
-          var rawUrl = d.path
-            ? 'https://raw.githubusercontent.com/'+d.repo+'/main/'+d.path
-            : 'data:'+mime+';base64,'+b64;  // fallback: embed as data URL
-          activeDay.stops[editIdx].photos.push(rawUrl);
-          markDirty();_readStopFields(activeDay.stops[editIdx]);
-          editStop(editIdx);switchTab('media');toast('✓ Foto subida','ok');
-        }).catch(function(e){toast('Error: '+e.message,'err');});
-    };r.readAsDataURL(file);
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.error){toast('Error: '+d.error,'err');return;}
+          var url=d.repo?'https://raw.githubusercontent.com/'+d.repo+'/main/'+d.path:ev.target.result;
+          applyStopFields();
+          curDay.stops[stopIdx].photos.push(url);
+          markDirty(); editStop(stopIdx); switchTab('media');
+          toast('✓ Foto subida','ok');
+        })
+        .catch(function(e){toast('Error: '+e.message,'err');});
+    };
+    r.readAsDataURL(file);
   };
   document.getElementById('fup').click();
 }
 
 async function searchWiki(){
-  if(editIdx===null)return;
-  var s=activeDay.stops[editIdx];
+  if(stopIdx===null)return;
+  var s=curDay.stops[stopIdx];
   var q=s.name+' '+(s.location||(tour.meta&&tour.meta.title)||'');
   var g=document.getElementById('wiki-grid');
-  g.innerHTML='<div style="font-style:italic;opacity:0.5;font-size:0.83rem;">Buscando…</div>';
+  g.innerHTML='<div style="font-style:italic;opacity:0.45;font-size:0.82rem;">Buscando…</div>';
   try{
     var r=await fetch('/.netlify/functions/wikimedia?query='+encodeURIComponent(q));
     var d=await r.json();
-    if(!d.ok||!d.photos||!d.photos.length){g.innerHTML='<div style="opacity:0.5;font-size:0.83rem;">Sin resultados</div>';return;}
+    if(!d.ok||!d.photos||!d.photos.length){g.innerHTML='<div style="opacity:0.45;font-size:0.82rem;">Sin resultados</div>';return;}
     wikiPhotos=d.photos;
     renderWikiGrid(s.photos||[]);
-  }catch(e){g.innerHTML='<div style="color:var(--err);font-size:0.83rem;">Error: '+e.message+'</div>';}
+  }catch(e){g.innerHTML='<div style="color:var(--err);font-size:0.82rem;">Error: '+e.message+'</div>';}
 }
 
 function renderWikiGrid(cur){
   var g=document.getElementById('wiki-grid');if(!g)return;
-  g.innerHTML='<div style="font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.55;margin-bottom:0.5rem;">Pulsa para añadir/quitar</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.4rem;">'+
-    wikiPhotos.map(function(p,i){
-      var sel=cur.indexOf(p.url)>=0;
-      return '<div onclick="toggleWiki('+i+')" style="position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;border:2px solid '+(sel?'var(--gold)':'transparent')+';transition:all .2s;">' +
-        '<img src="'+p.url+'" style="width:100%;height:100%;object-fit:cover;" loading="lazy">' +
-        (sel?'<div style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:0.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;">✓</div>':'')+'</div>';
-    }).join('')+'</div>';
+  var html='<div style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.55;margin-bottom:0.45rem;">Pulsa para añadir/quitar</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:0.4rem;">';
+  for(var i=0;i<wikiPhotos.length;i++){
+    var p=wikiPhotos[i];
+    var sel=cur.indexOf(p.url)>=0;
+    html+='<div onclick="toggleWiki('+i+')" style="position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;border:2px solid '+(sel?'var(--gold)':'transparent')+';transition:all .2s;">'+
+      '<img src="'+esc(p.url)+'" style="width:100%;height:100%;object-fit:cover;" loading="lazy">'+
+      (sel?'<div style="position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:0.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;">✓</div>':'')+
+    '</div>';
+  }
+  html+='</div>';
+  g.innerHTML=html;
 }
 
 function toggleWiki(wi){
-  if(editIdx===null)return;
-  var s=activeDay.stops[editIdx];if(!s.photos)s.photos=[];
+  if(stopIdx===null)return;
+  var s=curDay.stops[stopIdx];
+  if(!s.photos) s.photos=[];
   var url=wikiPhotos[wi].url;
   var pos=s.photos.indexOf(url);
-  if(pos>=0)s.photos.splice(pos,1);else s.photos.push(url);
-  markDirty();renderWikiGrid(s.photos);
-  // Also read all current DOM fields so nothing is lost
-  _readStopFields(s);
+  if(pos>=0) s.photos.splice(pos,1);
+  else s.photos.push(url);
+  markDirty(); renderWikiGrid(s.photos);
 }
 
 // ── DRAG & DROP ───────────────────────────────────────────────────────────────
 function initDrag(){
-  document.querySelectorAll('.stop-row').forEach(function(row){
-    row.addEventListener('dragstart',function(e){dragSrc=parseInt(this.dataset.idx);e.dataTransfer.effectAllowed='move';});
-    row.addEventListener('dragend',function(){document.querySelectorAll('.stop-row').forEach(function(r){r.classList.remove('dragover');});});
-    row.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover');});
-    row.addEventListener('dragleave',function(){this.classList.remove('dragover');});
-    row.addEventListener('drop',function(e){
+  var rows=document.querySelectorAll('.stop-row');
+  for(var i=0;i<rows.length;i++){
+    rows[i].addEventListener('dragstart',function(e){dragSrc=parseInt(this.dataset.idx);e.dataTransfer.effectAllowed='move';});
+    rows[i].addEventListener('dragend',function(){
+      var all=document.querySelectorAll('.stop-row');
+      for(var j=0;j<all.length;j++) all[j].classList.remove('dragover');
+    });
+    rows[i].addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover');});
+    rows[i].addEventListener('dragleave',function(){this.classList.remove('dragover');});
+    rows[i].addEventListener('drop',function(e){
       e.preventDefault();this.classList.remove('dragover');
       var di=parseInt(this.dataset.idx);
       if(dragSrc===null||dragSrc===di)return;
-      var m=activeDay.stops.splice(dragSrc,1)[0];
-      activeDay.stops.splice(di,0,m);
-      markDirty();document.getElementById('stops-list').innerHTML=renderStops();initDrag();
+      var moved=curDay.stops.splice(dragSrc,1)[0];
+      curDay.stops.splice(di,0,moved);
+      markDirty();
+      document.getElementById('stops-list').innerHTML=renderStopRows();
+      initDrag();
     });
-  });
+  }
 }
 
 // ── SAVE ─────────────────────────────────────────────────────────────────────
 async function saveTour(){
-  // Apply meta fields if visible
-  if(document.getElementById('m-title')) updateMeta();
-  
-  // If stop editor is open, force-apply its fields first
-  if(editIdx!==null && activeDay && activeDay.stops && activeDay.stops[editIdx]){
-    _readStopFields(activeDay.stops[editIdx]);
-  }
+  // 1. Apply meta if visible
+  var mTitle=document.getElementById('m-title');
+  if(mTitle) applyMeta();
 
-  // Show what we're about to save
-  var totalStops = (tour.days||[]).reduce(function(a,d){return a+(d.stops||[]).length;},0);
-  var stopsWithPhotos = (tour.days||[]).reduce(function(a,d){return a.concat(d.stops||[]);},[]).filter(function(s){return s.photos&&s.photos.length>0;}).length;
-  var stopsWithVideo = (tour.days||[]).reduce(function(a,d){return a.concat(d.stops||[]);},[]).filter(function(s){return s.videoUrl&&s.videoUrl.length>0;}).length;
-  console.log('[saveTour] Saving: '+totalStops+' stops, '+stopsWithPhotos+' with photos, '+stopsWithVideo+' with video');
+  // 2. Apply open stop editor
+  if(stopIdx!==null) applyStopFields();
+
+  // 3. Apply open day fields
+  var dayT=document.getElementById('day-t');
+  if(dayT) applyDayFields();
 
   var btn=document.getElementById('save-btn');
-  btn.disabled=true;btn.textContent='⏳ Guardando…';
+  btn.disabled=true;
+  btn.textContent='⏳ Guardando…';
+  btn.style.background='';
+  btn.style.borderColor='';
+
   try{
     tour.meta.updatedAt=new Date().toISOString();
-    var payload = JSON.stringify({tourData:tour});
-    console.log('[saveTour] Payload size: '+payload.length+' chars');
-    var r=await fetch('/.netlify/functions/save',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':ADMIN_TOKEN},body:payload});
+    var r=await fetch('/.netlify/functions/save',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':TOKEN},
+      body:JSON.stringify({tourData:tour})
+    });
     var d=await r.json();
-    if(d.error)throw new Error(d.error);
+    if(d.error) throw new Error(d.error);
     dirty=false;
-    btn.textContent='✓ Guardado';btn.disabled=false;
-    // Verify the data endpoint serves the new version
+    btn.textContent='✓ Guardado';
     setTimeout(function(){
-      fetch('/.netlify/functions/data?t='+Date.now())
-        .then(function(r){return r.json();})
-        .then(function(d){
-          if(d.error){
-            toast('Guardado en GitHub pero error al verificar: '+d.error,'err');
-          } else {
-            var stops=(d.days||[]).reduce(function(acc,day){return acc+(day.stops||[]).length;},0);
-            toast('✓ Guardado y verificado — '+stops+' paradas en '+( d.days||[]).length+' día(s)','ok');
-          }
-        })
-        .catch(function(e){toast('Guardado en GitHub (verificación falló: '+e.message+')','ok');});
-      btn.textContent='💾 Guardar';btn.disabled=true;
-    btn.style.background='';btn.style.borderColor='';
-    },1500);
-  }catch(e){btn.textContent='💾 Guardar';btn.disabled=false;toast('Error: '+e.message,'err');}
+      btn.textContent='💾 Guardar';
+      btn.disabled=true;
+    },2000);
+    toast('✓ Guardado en GitHub','ok');
+  }catch(e){
+    btn.textContent='💾 Guardar';
+    btn.disabled=false;
+    toast('Error guardando: '+e.message,'err');
+  }
 }
 
 function markDirty(){
   dirty=true;
   var btn=document.getElementById('save-btn');
   btn.disabled=false;
-  btn.textContent='💾 Guardar cambios';
-  btn.style.background='#E84040';
-  btn.style.borderColor='#E84040';
+  btn.textContent='💾 Guardar';
+  btn.style.background='#c0392b';
+  btn.style.borderColor='#c0392b';
 }
 
-var tt;
-function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'ok');clearTimeout(tt);tt=setTimeout(function(){el.className='';},3200);}
+var toastTimer;
+function toast(msg,type){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+(type||'ok');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){el.className='';},3500);
+}
+
 window.addEventListener('beforeunload',function(e){if(dirty){e.preventDefault();e.returnValue='';}});
 </script>
 </body>
